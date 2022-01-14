@@ -4,8 +4,24 @@
 #include "hal.h"
 #include "rom.h"
 
-/* defined in kernel.c */
-void copy_mono_pixels(int* dest, int graphics, char zero, char one);
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
+void copy_mono_pixels(int* dest, int graphics, char zero, char one) {
+    int data;
+    int i = 1;
+    do {
+        data = (graphics&i) ? one : zero;
+        i <<= 1;
+        data |= ((graphics&i) ? one : zero) << 8;
+        i <<= 1;
+        data |= ((graphics&i) ? one : zero) << 16;
+        i <<= 1;
+        data |= ((graphics&i) ? one : zero) << 24;
+        i <<= 1;
+        *(dest++) = data;
+    } while (i != 0);
+}
 
 static void do_nothing(void) {
     return;

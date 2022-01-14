@@ -45,22 +45,29 @@ typedef enum {
 	EXEC_MODE_TO_RET,
 } exec_mode_t;
 
+#endif /* _TAMALIB_H_ */
 
-void tamalib_release(void);
-bool_t tamalib_init(const u12_t *program, breakpoint_t *breakpoints, u32_t freq);
+#ifdef __cplusplus
+extern "C"{
+#endif
 
-void tamalib_set_framerate(u8_t framerate);
-u8_t tamalib_get_framerate(void);
+extern void tamalib_release(void);
+extern bool_t tamalib_init(const u12_t *program, breakpoint_t *breakpoints, u32_t freq);
 
-void tamalib_register_hal(hal_t *hal);
+extern void tamalib_set_framerate(u8_t framerate);
+extern u8_t tamalib_get_framerate(void);
 
-void tamalib_set_exec_mode(exec_mode_t mode);
+extern void tamalib_register_hal(hal_t *hal);
+
+extern void tamalib_set_exec_mode(exec_mode_t mode);
 
 /* NOTE: Only one of these two functions must be used in the main application
  * (tamalib_step() should be used only if tamalib_mainloop() does not fit the
  * main application execution flow).
  */
-void tamalib_step(void);
-void tamalib_mainloop(void);
+extern void tamalib_step(void);
+extern void tamalib_mainloop(void);
 
-#endif /* _TAMALIB_H_ */
+#ifdef __cplusplus
+}
+#endif

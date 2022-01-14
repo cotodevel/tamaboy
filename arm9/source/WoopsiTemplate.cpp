@@ -21,8 +21,11 @@
 #include "videoTGDS.h"
 #include "math.h"
 #include "imagepcx.h"
-#include "Texture_CubeCustom.h"
 #include "dswnifi_lib.h"
+#include "tamalib.h"
+#include "tama_process.h"
+#include "hal.h"
+#include "rom.h"
 
 __attribute__((section(".dtcm")))
 WoopsiTemplate * WoopsiTemplateProc = NULL;
@@ -67,37 +70,19 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
 		
 	}
 	
-	//gl start
-	float camDist = 0.1*4;
-	float rotateX = 0.0;
-	float rotateY = 0.0;
-	{
-		setOrientation(ORIENTATION_0, true);
-		
-		//set mode 0, enable BG0 and set it to 3D
-		SETDISPCNT_MAIN(MODE_0_3D);
-		
-		//this should work the same as the normal gl call
-		glViewPort(0,0,255,191);
-		
-		glClearColor(0,0,0);
-		glClearDepth(0x7FFF);
-		
-		glReset();
-		
-		LoadGLTextures((u8*)&Texture_CubeCustom);
-		
-		glEnable(GL_ANTIALIAS);
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		
-		//any floating point gl call is being converted to fixed prior to being implemented
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		gluPerspective(35, 256.0 / 192.0, 0.1, 40);
-		
-	}
-	//gl end
+	//tama setup
+    setup_vram();
+    tamalib_register_hal(&tama_hal);
+    tamalib_init(g_program, NULL, 1000);
+    cpu_set_speed(0);
+    cycle_count = cpu_get_state()->tick_counter;
+    // enable interrupts //no, TGDS API
+    //REG_IME = 0;
+    //REG_IE |= 1;
+    //REG_DISPSTAT |= 8;
+    //*(int*)0x03007FFC = (int)&interrupt_handler; 
+    //REG_IME = 1;
+	
 	
 	Rect rect;
 
@@ -348,8 +333,6 @@ void Woopsi::ApplicationMainLoop()  {
 	
 	//Handle TGDS stuff...
 	
-	
-	
 	switch(pendPlay){
 		case(1):{
 			internalCodecType = playSoundStream(currentFileChosen, _FileHandleVideo, _FileHandleAudio);
@@ -368,4 +351,7 @@ void Woopsi::ApplicationMainLoop()  {
 		}
 		break;
 	}
+	
+	//tama process
+	tama_process();
 }

@@ -1,70 +1,23 @@
 #include "typedefsTGDS.h"
+#include "posixHandleTGDS.h"
+#include "keypadTGDS.h"
+#include "gui_console_connector.h"
+#include "TGDSLogoLZSSCompressed.h"
+#include "VideoGL.h"
+#include "videoTGDS.h"
 #include "tamalib/tamalib.h"
 #include "tamalib/cpu.h"
 #include "hal.h"
 #include "rom.h"
 #include "dsregs.h"
 
-void setup_vram(void);
-void copy_mono_pixels(int* dest, int graphics, char zero, char one);
+u32* cycle_count=NULL;
+u32 next_frame_count=0;
+int next_frame_overflow=0;
 
-//todo: port to NDS
-/*
-void main(void) {
-    int i;
-    u32_t* cycle_count;
-    u32_t next_frame_count=0;
-    int next_frame_overflow=0;
-
-    setup_vram();
-    tamalib_register_hal(&tama_hal);
-    tamalib_init(g_program, NULL, 1000);
-    cpu_set_speed(0);
-    cycle_count = cpu_get_state()->tick_counter;
-    // enable interrupts //no, TGDS API
-    //REG_IME = 0;
-    //REG_IE |= 1;
-    //REG_DISPSTAT |= 8;
-    //*(int*)0x03007FFC = (int)&interrupt_handler; 
-    //REG_IME = 1;
-    while (1) {
-        // wait for vblank 
-        SystemCall(5);
-        // copy buffer to screen 
-        for (i=0; i<256; i++)
-            ((u32*)LCD_MAP)[i] = ((u32*)LCD_BUFFER)[i];
-        // show or hide the overlay 
-        if (show_overlay > 0) {
-            show_overlay--;
-            REG_DISPCNT |= 1<<10;
-        } else {
-            REG_DISPCNT &= ~(1<<10);
-        }
-        // process buttons 
-        i = ~REG_KEYINPUT;
-        hw_set_button(BTN_LEFT, (i&(KEY_SELECT|KEY_LEFT))?1:0);
-        hw_set_button(BTN_MIDDLE, (i&(KEY_A|KEY_UP|KEY_DOWN))?1:0);
-        hw_set_button(BTN_RIGHT, (i&(KEY_B|KEY_RIGHT))?1:0);
-        if (i & KEY_START)
-            show_overlay = 1;
-        // set number of cycles to next frame 
-        next_frame_count += 546;
-        next_frame_overflow += 0xa;
-        if (next_frame_overflow >= 0x10) {
-            next_frame_overflow &= 0xf;
-            next_frame_count++;
-        }
-        // do some processor stuff 
-        while (*cycle_count < next_frame_count) {
-            tamalib_step();
-            tamalib_step();
-            tamalib_step();
-            tamalib_step();
-        }
-    }
-}
-*/
-
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
 void setup_vram(void) {
     int i;
 
@@ -127,18 +80,40 @@ void setup_vram(void) {
     REG_DISPCNT = (1<<11) | (2<<0);
 }
 
-void copy_mono_pixels(int* dest, int graphics, char zero, char one) {
-    int data;
-    int i = 1;
-    do {
-        data = (graphics&i) ? one : zero;
-        i <<= 1;
-        data |= ((graphics&i) ? one : zero) << 8;
-        i <<= 1;
-        data |= ((graphics&i) ? one : zero) << 16;
-        i <<= 1;
-        data |= ((graphics&i) ? one : zero) << 24;
-        i <<= 1;
-        *(dest++) = data;
-    } while (i != 0);
+void tama_process(){
+	// wait for vblank 
+	IRQWait(0, IRQ_VBLANK);
+	
+	// copy buffer to screen 
+	int i=0;
+	for (i=0; i<256; i++)
+		((u32*)LCD_MAP)[i] = ((u32*)LCD_BUFFER)[i];
+	// show or hide the overlay 
+	if (show_overlay > 0) {
+		show_overlay--;
+		REG_DISPCNT |= 1<<10;
+	} else {
+		REG_DISPCNT &= ~(1<<10);
+	}
+	// process buttons 
+	i = ~REG_KEYINPUT;
+	hw_set_button(BTN_LEFT, (i&(KEY_SELECT|KEY_LEFT))?1:0);
+	hw_set_button(BTN_MIDDLE, (i&(KEY_A|KEY_UP|KEY_DOWN))?1:0);
+	hw_set_button(BTN_RIGHT, (i&(KEY_B|KEY_RIGHT))?1:0);
+	if (i & KEY_START)
+		show_overlay = 1;
+	// set number of cycles to next frame 
+	next_frame_count += 546;
+	next_frame_overflow += 0xa;
+	if (next_frame_overflow >= 0x10) {
+		next_frame_overflow &= 0xf;
+		next_frame_count++;
+	}
+	// do some processor stuff 
+	while (*cycle_count < next_frame_count) {
+		tamalib_step();
+		tamalib_step();
+		tamalib_step();
+		tamalib_step();
+	}
 }

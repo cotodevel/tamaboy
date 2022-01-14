@@ -96,29 +96,6 @@ void VblankUser(){
 __attribute__((section(".itcm")))
 #endif
 void VcounterUser(){	
-	glPushMatrix();
-		
-	glMatrixMode(GL_POSITION);
-	glLoadIdentity();
-	
-	gluLookAt(	0.0, 0.0, camDist,		//camera possition 
-			0.0, -1.0, 4.0,		//look at
-			0.0, 1.0, 0.0);		//up
-	
-	glTranslatef32(0, 0, 0.0);
-	glRotateXi(rotateX);
-	glRotateYi(rotateY);
-	glMaterialf(GL_EMISSION, RGB15(31,31,31));
-	glPolyFmt(POLY_ALPHA(31) | POLY_CULL_BACK );
-	
-	glRotateX(-90.0);	//Because OBJ Axis is 90º inverted...
-	glRotateY(45.0);	
-	glCallListGX((u32*)&CubeImported);
-	glFlush();
-	glPopMatrix(1);
-	
-	rotateX += 0.3;
-	rotateY += 0.3;
 }
 
 //Note: this event is hardware triggered from ARM7, on ARM9 a signal is raised through the FIFO hardware

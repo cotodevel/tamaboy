@@ -20,6 +20,7 @@
 #include "cpu.h"
 #include "hw.h"
 #include "hal.h"
+#include "rom.h"
 
 #define TICK_FREQUENCY				32768 // Hz
 
@@ -133,7 +134,6 @@ static u8_t sp;
 /* Flags */
 static u4_t flags;
 
-static const u12_t *g_program = NULL;
 static u4_t memory[MEMORY_SIZE];
 
 static input_port_t inputs[INPUT_PORT_NUM] = {{0}};
@@ -1576,7 +1576,7 @@ void cpu_reset(void)
 bool_t cpu_init(const u12_t *program, breakpoint_t *breakpoints, u32_t freq)
 {
     int op, i;
-	g_program = program;
+	//g_program = program; //todo: use other programs?
 	g_breakpoints = breakpoints;
 	ts_freq = freq;
 
