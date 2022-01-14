@@ -3,17 +3,12 @@
 NTR/TWL SDK: TGDS1.65
 
 tamaboy is a [Tamagotchi v1](http://adb.arcadeitalia.net/?mame=tama) emulator
-for Gameboy Advance based on [TamaLIB](https://github.com/jcrona/tamalib/).
-
-tamaboy has not yet been tested on real hardware. The `.gba` file will need to
-be patched with the [Nintendo
-Logo](https://github.com/mgba-emu/gbatek/blob/gh-pages/gba.md#gbacartridgeheader)
-to work on hardware.
+for Nintendo DS / DSi / 3DS based on [TamaLIB](https://github.com/jcrona/tamalib/).
 
 ## Usage
 
 The Tamagotchi's Left, Middle and Right buttons are mapped respectively to the
-d-pad Left, UpDown and Right.
+d-pad Left, UpDown and Right. Or use the touchscreen controls
 
 The same buttons are also mapped to Select, A and B respectively. This mapping
 is intended to be as intuitive as possible to navigate the device's menus.
@@ -28,23 +23,13 @@ shown for 3 seconds when an icon changes. Press start to dismiss.
 NB: Make sure to set the clock or your egg will never hatch. There should be
 animated arrows on the clock screen.
 
-*Do not* shut off your Gameboy or your Tamagotchi will die.
-
 ## Compile Time Dependencies
 
-- gba-dev from [devkitPro](https://devkitpro.org/wiki/Getting_Started)
-- python3 and pillow (`pip3 install pillow`)
-- a tamagotchi rom (the file named `tama.b` from the MAME romset `tama.zip`)
+- TGDS (https://bitbucket.org/Coto88/toolchaingenericds/src)
 
 ## How to Compile
 
-Place the rom in this directory with the name `tama.b`. This file should be
-12288 bytes.
-
-Run the command `make`.
-
-The otput file `tamaboy.gba` is a standalone Gameboy Advance multiboot image
-that contains the tamaboy emulator and the provided rom file.
+Since this is a TGDS project, you can follow the same steps, as, for example, https://bitbucket.org/Coto88/toolchaingenericds-template/
 
 
 TGDS Port status:
@@ -52,3 +37,4 @@ TGDS Port status:
 Todo: 
 - move tamagotchi process to its own rendering window instead of hardcoded VRAM
 - sound
+- RTC and filesystem support to allow the tamagotchi to live even if console is turned off.
