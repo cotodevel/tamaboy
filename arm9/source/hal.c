@@ -3,6 +3,95 @@
 #include "hal_types.h"
 #include "hal.h"
 #include "rom.h"
+#include "dmaTGDS.h"
+#include "tama_process.h"
+
+bool_t matrix_buffer[LCD_HEIGHT][LCD_WIDTH] = {{0}};
+bool_t icon_buffer[ICON_NUM] = {0};
+
+const bool_t icons[ICON_NUM][ICON_SIZE][ICON_SIZE] = {
+	{
+		{1, 0, 1, 0, 1, 0, 0, 1},
+		{1, 0, 1, 0, 1, 0, 1, 1},
+		{1, 1, 1, 1, 1, 0, 1, 1},
+		{0, 1, 1, 1, 0, 1, 1, 1},
+		{0, 0, 1, 0, 0, 1, 1, 1},
+		{0, 0, 1, 0, 0, 0, 1, 1},
+		{0, 0, 1, 0, 0, 0, 0, 1},
+		{0, 0, 1, 0, 0, 0, 0, 1},
+	},
+	{
+		{0, 1, 0, 0, 0, 0, 1, 0},
+		{0, 0, 0, 1, 1, 0, 0, 0},
+		{1, 0, 1, 0, 0, 1, 0, 1},
+		{0, 0, 1, 0, 0, 1, 0, 0},
+		{0, 0, 0, 1, 1, 0, 0, 0},
+		{0, 1, 0, 0, 0, 0, 1, 0},
+		{0, 0, 0, 1, 1, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+	},
+	{
+		{1, 1, 1, 0, 0, 1, 1, 1},
+		{1, 0, 1, 0, 1, 1, 1, 1},
+		{1, 1, 1, 0, 1, 1, 1, 1},
+		{0, 0, 0, 1, 1, 1, 1, 0},
+		{0, 0, 1, 1, 1, 0, 0, 0},
+		{0, 0, 1, 1, 0, 0, 0, 0},
+		{1, 1, 0, 0, 0, 0, 0, 0},
+		{1, 1, 0, 0, 0, 0, 0, 0},
+	},
+	{
+		{0, 0, 0, 1, 1, 1, 0, 0},
+		{0, 0, 0, 0, 1, 1, 1, 0},
+		{0, 0, 0, 1, 1, 1, 1, 1},
+		{0, 0, 1, 1, 0, 1, 1, 1},
+		{0, 1, 1, 0, 1, 1, 0, 1},
+		{0, 1, 1, 1, 1, 0, 0, 0},
+		{1, 1, 1, 1, 0, 0, 0, 0},
+		{1, 1, 0, 0, 0, 0, 0, 0},
+	},
+	{
+		{0, 1, 1, 0, 0, 0, 0, 0},
+		{1, 0, 0, 1, 0, 0, 1, 1},
+		{1, 0, 0, 1, 1, 1, 0, 1},
+		{0, 1, 0, 1, 0, 0, 1, 1},
+		{0, 1, 0, 0, 1, 1, 0, 1},
+		{0, 1, 0, 0, 0, 0, 0, 1},
+		{0, 1, 1, 0, 0, 0, 1, 1},
+		{0, 0, 1, 1, 1, 1, 1, 0},
+	},
+	{
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 1, 1, 1, 1, 1, 1, 0},
+		{1, 0, 0, 0, 0, 0, 0, 1},
+		{1, 0, 1, 0, 1, 0, 1, 1},
+		{1, 0, 1, 0, 1, 0, 1, 1},
+		{1, 0, 0, 1, 0, 0, 0, 1},
+		{0, 1, 0, 0, 1, 0, 1, 0},
+		{0, 0, 1, 1, 1, 1, 0, 0},
+	},
+	{
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 1, 0},
+		{0, 0, 0, 0, 0, 1, 0, 1},
+		{0, 1, 1, 1, 0, 1, 0, 1},
+		{1, 1, 1, 0, 0, 1, 0, 1},
+		{1, 1, 0, 0, 1, 0, 1, 0},
+		{1, 1, 1, 0, 0, 0, 0, 0},
+		{0, 1, 1, 1, 0, 0, 0, 0},
+	},
+	{
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 1, 1, 1, 0, 0, 0, 0},
+		{1, 0, 0, 0, 1, 0, 0, 0},
+		{1, 1, 0, 1, 1, 1, 1, 0},
+		{1, 0, 1, 0, 0, 1, 0, 1},
+		{0, 1, 1, 1, 1, 0, 1, 1},
+		{0, 0, 0, 1, 0, 0, 0, 1},
+		{0, 0, 0, 0, 1, 1, 1, 0},
+	},
+};
+
 
 #ifdef ARM9
 __attribute__((section(".itcm")))
@@ -66,16 +155,75 @@ static void play_frequency(bool_t en) {
     //else REG_SOUNDCNT_L=0x0077; //todo sound
 }
 
+void ClrBuf(){
+	/* Dot matrix */
+	int j = 0;
+	int i = 0;
+	for (j = 0; j < LCD_HEIGHT; j++) {
+		for (i = 0; i < LCD_WIDTH; i++) {
+			draw_square(i * PIXEL_SIZE + LCD_OFFET_X, j * PIXEL_SIZE + LCD_OFFET_Y, PIXEL_SIZE, PIXEL_SIZE, 0);
+		}
+	}
+
+	/* Icons */
+	for (i = 0; i < ICON_NUM; i++) {
+		draw_icon((i % 4) * ICON_STRIDE_X + ICON_OFFSET_X, (i / 4) * ICON_STRIDE_Y + ICON_OFFSET_Y, i, 0);
+	}
+}
+
+//DS is fast. So we can handle pixel by pixel on a small screen
+void hal_update_screen(void)
+{
+	u8_t i, j;
+	ClrBuf();
+
+	/* Dot matrix */
+	for (j = 0; j < LCD_HEIGHT; j++) {
+		for (i = 0; i < LCD_WIDTH; i++) {
+			if (matrix_buffer[j][i]) {
+				draw_square(i * PIXEL_SIZE + LCD_OFFET_X, j * PIXEL_SIZE + LCD_OFFET_Y, PIXEL_SIZE, PIXEL_SIZE, 1);
+			}
+		}
+	}
+
+	/* Icons */
+	for (i = 0; i < ICON_NUM; i++) {
+		if (icon_buffer[i]) {
+			draw_icon((i % 4) * ICON_STRIDE_X + ICON_OFFSET_X, (i / 4) * ICON_STRIDE_Y + ICON_OFFSET_Y, i, 1);
+		}
+	}
+	
+}
+
+void hal_set_lcd_matrix(u8_t x, u8_t y, bool_t val)
+{
+	matrix_buffer[y][x] = val;
+}
+
+void hal_set_lcd_icon(u8_t icon, bool_t val)
+{
+	if (icon_buffer[icon] == 0 && val == 1) {
+		/* The Tamagotchi is calling */
+		/*
+		if (menu_is_visible()) {
+			menu_close();
+		}
+		*/
+	}
+
+	icon_buffer[icon] = val;
+}
+
 /* global variables */
 hal_t tama_hal = {
     .get_timestamp = get_timestamp,
-    .set_lcd_matrix = set_lcd_matrix,
-    .set_lcd_icon = set_lcd_icon,
+    .set_lcd_matrix = &hal_set_lcd_matrix,
+    .set_lcd_icon = &hal_set_lcd_icon,
     .set_frequency = set_frequency,
     .play_frequency = play_frequency,
 
     .sleep_until = do_nothing,
-    .update_screen = do_nothing,
+    .update_screen = &hal_update_screen,
     .handler = do_nothing
 };
 u8 LCD_BUFFER[1024];

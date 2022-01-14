@@ -15,7 +15,7 @@ using namespace std;
 
 using namespace WoopsiUI;
 
-#define TGDSPROJECTNAME ((char*) "ToolchainGenericDS-foobilliard")
+#define TGDSPROJECTNAME ((char*) "tamaboy-nds")
 
 class WoopsiTemplate : public Woopsi, public GadgetEventHandler {
 public:

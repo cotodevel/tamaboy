@@ -29,10 +29,6 @@
 
 __attribute__((section(".dtcm")))
 WoopsiTemplate * WoopsiTemplateProc = NULL;
-
-float camDist = -0.3*4;
-float rotateX = 0.0;
-float rotateY = 0.0;
 	
 void WoopsiTemplate::startup(int argc, char **argv)   {
 	
@@ -83,7 +79,9 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
     //*(int*)0x03007FFC = (int)&interrupt_handler; 
     //REG_IME = 1;
 	
-	
+	//render TGDSLogo from a LZSS compressed file
+	RenderTGDSLogoMainEngine((uint8*)&TGDSLogoLZSSCompressed[0], TGDSLogoLZSSCompressed_size);
+
 	Rect rect;
 
 	/** SuperBitmap preparation **/

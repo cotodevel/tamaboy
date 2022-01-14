@@ -10,6 +10,7 @@
 #include "hal.h"
 #include "rom.h"
 #include "dsregs.h"
+#include "tama_process.h"
 
 u32* cycle_count=NULL;
 u32 next_frame_count=0;
@@ -20,47 +21,8 @@ __attribute__((section(".itcm")))
 #endif
 void setup_vram(void) {
     int i;
-
-    /* initialize LCD_BUFFER */
-    for (i=0; i<1024; i++)
-        LCD_BUFFER[i] = 0;
-
-    /* set up palette */
-    BG_PALETTE[0] = 0xffff; /* white (but really transparent) */
-    BG_PALETTE[1] = 0x0000; /* black */
-    BG_PALETTE[2] = 0x5294; /* icon overlay background */
-    BG_PALETTE[3] = 0x294a; /* lcd icon off */
-
-    /* tile 0 is blank */
-    for (i=0; i<64/4; i++)
-        TILES[i] = 0;
-    /* tile 1 is solid "pixel" */
-    for ( ; i<128/4; i++)
-        TILES[i] = 0x01010101;
-
-    /* tiles 2-130 are icons
-    there are 8 icons, each 4x4 tiles for a total of 128 tiles
-    or 256 calls to copy_mono_pixels (which loads half a tile at a time) */
-    for (i=0; i<256; i++)
-        copy_mono_pixels(TILES+8*(i+4), LCD_ICONS_RAW[i], 2,3);
-
-    /* BG2 shows lcd icons */
-    REG_BG2CNT = (3<<2) | (1<<7) | (1<<8);
-    REG_BG2Y = -(84<<8);
-    REG_BG2X = -(100<<8);
-    for (i=0; i<128; i+=2) {
-        ICONS_MAP[i/2] = (i+2) | ((i+3)<<8);
-    }
-
-    /* BG3 shows lcd dot matrix */
-    REG_BG3CNT = (3<<2) | (1<<7) | (0<<8) | (1<<14);
-    REG_BG3X = 0;
-    REG_BG3Y = -0x1400;
-    REG_BG3PA = 0x111;
-    REG_BG3PB = 0;
-    REG_BG3PC = 0;
-    REG_BG3PD = 0x111;
-
+	
+    
     /* set up sound */
 	//todo: sound
 	/*
@@ -76,27 +38,18 @@ void setup_vram(void) {
     show_overlay = 0;
     lcd_icon_state = 0;
 
-    /* enable bg3 */
-    REG_DISPCNT = (1<<11) | (2<<0);
+    
 }
 
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
 void tama_process(){
 	// wait for vblank 
-	IRQWait(0, IRQ_VBLANK);
+	IRQWait(0, IRQ_VBLANK);	
 	
-	// copy buffer to screen 
-	int i=0;
-	for (i=0; i<256; i++)
-		((u32*)LCD_MAP)[i] = ((u32*)LCD_BUFFER)[i];
-	// show or hide the overlay 
-	if (show_overlay > 0) {
-		show_overlay--;
-		REG_DISPCNT |= 1<<10;
-	} else {
-		REG_DISPCNT &= ~(1<<10);
-	}
 	// process buttons 
-	i = ~REG_KEYINPUT;
+	int i = ~REG_KEYINPUT;
 	hw_set_button(BTN_LEFT, (i&(KEY_SELECT|KEY_LEFT))?1:0);
 	hw_set_button(BTN_MIDDLE, (i&(KEY_A|KEY_UP|KEY_DOWN))?1:0);
 	hw_set_button(BTN_RIGHT, (i&(KEY_B|KEY_RIGHT))?1:0);
@@ -115,5 +68,74 @@ void tama_process(){
 		tamalib_step();
 		tamalib_step();
 		tamalib_step();
+	}
+	
+	hal_update_screen();
+}
+
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
+void setPixel(int row, int col, u16 color) {
+	VRAM_BUFFER[OFFSET(row, col, SCREENWIDTH)] = color | PIXEL_ENABLE;
+}
+
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
+void draw_icon(uint8_t x, uint8_t y, uint8_t num, uint8_t v)
+{
+	uint8_t i, j;
+
+	if (v) {
+		for (j = 0; j < ICON_SIZE; j++) {
+			for (i = 0; i < ICON_SIZE; i++) {
+				if(icons[num][j][i]) {
+					SetPix(x + i, y + j);
+				}
+			}
+		}
+	} else {
+		for (j = 0; j < ICON_SIZE; j++) {
+			for (i = 0; i < ICON_SIZE; i++) {
+				if(icons[num][j][i]) {
+					ClrPix(x + i, y + j);
+				}
+			}
+		}
+	}
+}
+
+
+uint8_t SetPix(uint8_t X, uint8_t Y){
+	setPixel((int)Y, (int)X, PixNorm); //same as uint8_t WritePix(int16_t X, int16_t Y, PixT V)
+	return 0;	
+}
+
+uint8_t ClrPix(uint8_t X, uint8_t Y){
+	setPixel((int)Y, (int)X, PixInv); //same as uint8_t WritePix(int16_t X, int16_t Y, PixT V)
+	return 0;
+}
+
+
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
+void draw_square(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t v)
+{
+	uint8_t i, j;
+
+	if (v) {
+		for (j = 0; j < h; j++) {
+			for (i = 0; i < w; i++) {
+				SetPix(x + i, y + j);
+			}
+		}
+	} else {
+		for (j = 0; j < h; j++) {
+			for (i = 0; i < w; i++) {
+				ClrPix(x + i, y + j);
+			}
+		}
 	}
 }

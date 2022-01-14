@@ -1,11 +1,6 @@
-# tamaboy
+![tamaboy](img/tamaboy_nds.png)
 
-TGDS Readme:
-
-TGDS 1.65 port of tamaboy, currently WIP
-
-
-Original Readme:
+NTR/TWL SDK: TGDS1.65
 
 tamaboy is a [Tamagotchi v1](http://adb.arcadeitalia.net/?mame=tama) emulator
 for Gameboy Advance based on [TamaLIB](https://github.com/jcrona/tamalib/).
@@ -50,3 +45,10 @@ Run the command `make`.
 
 The otput file `tamaboy.gba` is a standalone Gameboy Advance multiboot image
 that contains the tamaboy emulator and the provided rom file.
+
+
+TGDS Port status:
+
+Todo: 
+- move tamagotchi process to its own rendering window instead of hardcoded VRAM
+- sound

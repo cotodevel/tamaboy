@@ -116,9 +116,9 @@ vramSetup * TGDSFOOBILLIARD_3DVRAM_SETUP(){
 	//Main Engine Setup: 
 	
 	//VRAM A and B reserved for 2D Textures to-be used with the 3D Engine
-	vramSetupInst->vramBankSetupInst[VRAM_A_INDEX].vrambankCR = VRAM_A_ENGINE_A_3DENGINE_TEXTURE;
+	vramSetupInst->vramBankSetupInst[VRAM_A_INDEX].vrambankCR = VRAM_A_0x06000000_ENGINE_A_BG;
 	vramSetupInst->vramBankSetupInst[VRAM_A_INDEX].enabled = true;																		
-	vramSetupInst->vramBankSetupInst[VRAM_B_INDEX].vrambankCR = VRAM_B_ENGINE_A_3DENGINE_TEXTURE;
+	vramSetupInst->vramBankSetupInst[VRAM_B_INDEX].vrambankCR = VRAM_B_0x06020000_ENGINE_A_BG;
 	vramSetupInst->vramBankSetupInst[VRAM_B_INDEX].enabled = true;
 	
 	//VRAM C: WoopsiTGDS Touchscreen UI
