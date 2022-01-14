@@ -1,5 +1,5 @@
-#include <gba.h>
-#include "tamalib/tamalib.h"
+#include "typedefsTGDS.h"
+#include "tamalib.h"
 #include "hal_types.h"
 #include "hal.h"
 #include "rom.h"
@@ -26,8 +26,10 @@ static void set_lcd_icon(u8_t icon, bool_t en) {
         int x = (icon&3)*4;
         int y = (icon>=4)?4:0;
         int col = en ? 1 : 3;
-        for (int dx=0; dx<4; dx++) {
-            for (int dy=0; dy<4; dy++) {
+        int dx=0;
+		for (dx=0; dx<4; dx++) {
+            int dy=0;
+			for (dy=0; dy<4; dy++) {
                int i = 2 * ( (y+dy)*16 + dx+x );
                copy_mono_pixels(TILES+8*(i+4), LCD_ICONS_RAW[i], 2,col);
                copy_mono_pixels(TILES+8*(i+5), LCD_ICONS_RAW[i+1], 2,col);
@@ -41,11 +43,11 @@ static void set_lcd_icon(u8_t icon, bool_t en) {
 static void set_frequency(u32_t freq) {
     short const freq_table[] = {2016,2008,2000,1992,1984,1968,1951,1936};
     int n = freq_table[freq];
-    REG_SOUND1CNT_X = n | 1<<15;
+    //REG_SOUND1CNT_X = n | 1<<15; //todo sound
 }
 static void play_frequency(bool_t en) {
-    if (en) REG_SOUNDCNT_L=0x1177;
-    else REG_SOUNDCNT_L=0x0077;
+    //if (en) REG_SOUNDCNT_L=0x1177; //todo sound
+    //else REG_SOUNDCNT_L=0x0077; //todo sound
 }
 
 /* global variables */

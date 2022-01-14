@@ -1,5 +1,12 @@
 # tamaboy
 
+TGDS Readme:
+
+TGDS 1.65 port of tamaboy, currently WIP
+
+
+Original Readme:
+
 tamaboy is a [Tamagotchi v1](http://adb.arcadeitalia.net/?mame=tama) emulator
 for Gameboy Advance based on [TamaLIB](https://github.com/jcrona/tamalib/).
 

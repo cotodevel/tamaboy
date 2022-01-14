@@ -561,9 +561,10 @@ void cpu_refresh_hw(void)
 
 		{ 0, 0 }, // end of list
 	};
-
-	for (int i = 0; refresh_locs[i].size != 0; i++) {
-		for (u12_t n = refresh_locs[i].addr; n < (refresh_locs[i].addr + refresh_locs[i].size); n++) {
+	int i = 0;
+	for (i = 0; refresh_locs[i].size != 0; i++) {
+		u12_t n = 0;
+		for (n = refresh_locs[i].addr; n < (refresh_locs[i].addr + refresh_locs[i].size); n++) {
 			set_memory(n, memory[n]);
 		}
 	}

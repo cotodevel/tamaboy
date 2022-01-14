@@ -1,9 +1,0 @@
-*.out
-*.o
-*.gba
-*.sav
-*.swp
-*.swo
-__pycache__/
-tama.b
-rom.c

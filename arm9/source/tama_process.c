@@ -1,13 +1,15 @@
-#include <gba.h>
+#include "typedefsTGDS.h"
 #include "tamalib/tamalib.h"
 #include "tamalib/cpu.h"
 #include "hal.h"
 #include "rom.h"
-#include "interrupt.h"
+#include "dsregs.h"
 
 void setup_vram(void);
 void copy_mono_pixels(int* dest, int graphics, char zero, char one);
 
+//todo: port to NDS
+/*
 void main(void) {
     int i;
     u32_t* cycle_count;
@@ -19,40 +21,40 @@ void main(void) {
     tamalib_init(g_program, NULL, 1000);
     cpu_set_speed(0);
     cycle_count = cpu_get_state()->tick_counter;
-    /* enable interrupts */
-    REG_IME = 0;
-    REG_IE |= 1;
-    REG_DISPSTAT |= 8;
-    *(int*)0x03007FFC = (int)&interrupt_handler;
-    REG_IME = 1;
+    // enable interrupts //no, TGDS API
+    //REG_IME = 0;
+    //REG_IE |= 1;
+    //REG_DISPSTAT |= 8;
+    //*(int*)0x03007FFC = (int)&interrupt_handler; 
+    //REG_IME = 1;
     while (1) {
-        /* wait for vblank */
+        // wait for vblank 
         SystemCall(5);
-        /* copy buffer to screen */
+        // copy buffer to screen 
         for (i=0; i<256; i++)
             ((u32*)LCD_MAP)[i] = ((u32*)LCD_BUFFER)[i];
-        /* show or hide the overlay */
+        // show or hide the overlay 
         if (show_overlay > 0) {
             show_overlay--;
             REG_DISPCNT |= 1<<10;
         } else {
             REG_DISPCNT &= ~(1<<10);
         }
-        /* process buttons */
+        // process buttons 
         i = ~REG_KEYINPUT;
         hw_set_button(BTN_LEFT, (i&(KEY_SELECT|KEY_LEFT))?1:0);
         hw_set_button(BTN_MIDDLE, (i&(KEY_A|KEY_UP|KEY_DOWN))?1:0);
         hw_set_button(BTN_RIGHT, (i&(KEY_B|KEY_RIGHT))?1:0);
         if (i & KEY_START)
             show_overlay = 1;
-        /* set number of cycles to next frame */
+        // set number of cycles to next frame 
         next_frame_count += 546;
         next_frame_overflow += 0xa;
         if (next_frame_overflow >= 0x10) {
             next_frame_overflow &= 0xf;
             next_frame_count++;
         }
-        /* do some processor stuff */
+        // do some processor stuff 
         while (*cycle_count < next_frame_count) {
             tamalib_step();
             tamalib_step();
@@ -61,6 +63,7 @@ void main(void) {
         }
     }
 }
+*/
 
 void setup_vram(void) {
     int i;
@@ -106,12 +109,15 @@ void setup_vram(void) {
     REG_BG3PD = 0x111;
 
     /* set up sound */
+	//todo: sound
+	/*
     REG_SOUNDCNT_X = 0x80;
     REG_SOUNDCNT_L=0x0077;
     REG_SOUNDCNT_H = 2;
     REG_SOUND1CNT_L=0x0;
     REG_SOUND1CNT_H= 2<<6 | 15<<12;
     REG_SOUND1CNT_X= 1<<15;
+	*/
 
     /* set up lcd icon variables */
     show_overlay = 0;
