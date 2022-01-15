@@ -46,8 +46,6 @@ void setup_vram(void) {
 __attribute__((section(".itcm")))
 #endif
 void tama_process(){
-	// wait for vblank 
-	IRQWait(0, IRQ_VBLANK);	
 	
 	// process buttons 
 	int i = ~REG_KEYINPUT;
@@ -65,6 +63,11 @@ void tama_process(){
 	}
 	// do some processor stuff 
 	while (*cycle_count < next_frame_count) {
+		tamalib_step();
+		tamalib_step();
+		tamalib_step();
+		tamalib_step();
+		
 		tamalib_step();
 		tamalib_step();
 		tamalib_step();
