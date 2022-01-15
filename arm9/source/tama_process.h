@@ -16,6 +16,15 @@
 #define PixInv (u16)(RGB15(31,31,31))
 #define PixNorm (u16)(RGB15(0,0,0))
 
+//scaling scheme: modified from StellaDS 
+#define screenScale (u16)(120)
+#define xOffset (u16)(0)
+#define yOffset (u16)(0)
+#define stretch_x (u16)((( (LCD_WIDTH << 2) / 256) << 8) | ( (LCD_WIDTH << 2) % 256))
+#define regBG3PD (u16)(((100 / screenScale)  << 8) | (100 % screenScale))
+#define regBG3X (u16)((xOffset)<<8)
+#define regBG3Y (u16)((yOffset)<<8)
+
 #endif
 
 

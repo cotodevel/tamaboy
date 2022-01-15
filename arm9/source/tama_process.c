@@ -38,7 +38,8 @@ void setup_vram(void) {
     show_overlay = 0;
     lcd_icon_state = 0;
 
-    
+	
+	  
 }
 
 #ifdef ARM9
@@ -106,12 +107,17 @@ void draw_icon(uint8_t x, uint8_t y, uint8_t num, uint8_t v)
 	}
 }
 
-
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
 uint8_t SetPix(uint8_t X, uint8_t Y){
 	setPixel((int)Y, (int)X, PixNorm); //same as uint8_t WritePix(int16_t X, int16_t Y, PixT V)
 	return 0;	
 }
 
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
 uint8_t ClrPix(uint8_t X, uint8_t Y){
 	setPixel((int)Y, (int)X, PixInv); //same as uint8_t WritePix(int16_t X, int16_t Y, PixT V)
 	return 0;

@@ -145,16 +145,26 @@ static void set_lcd_icon(u8_t icon, bool_t en) {
     }
 }
 
-static void set_frequency(u32_t freq) {
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
+void set_frequency(u32_t freq) {
     short const freq_table[] = {2016,2008,2000,1992,1984,1968,1951,1936};
     int n = freq_table[freq];
     //REG_SOUND1CNT_X = n | 1<<15; //todo sound
 }
-static void play_frequency(bool_t en) {
+
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
+void play_frequency(bool_t en) {
     //if (en) REG_SOUNDCNT_L=0x1177; //todo sound
     //else REG_SOUNDCNT_L=0x0077; //todo sound
 }
 
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
 void ClrBuf(){
 	/* Dot matrix */
 	int j = 0;
@@ -172,8 +182,10 @@ void ClrBuf(){
 }
 
 //DS is fast. So we can handle pixel by pixel on a small screen
-void hal_update_screen(void)
-{
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
+void hal_update_screen(void){
 	u8_t i, j;
 	ClrBuf();
 
@@ -193,6 +205,12 @@ void hal_update_screen(void)
 		}
 	}
 	
+	//apply scaling to main engine
+	REG_BG3PA = stretch_x;
+	REG_BG3PB = 0; REG_BG3PC = 0;
+	REG_BG3PD = regBG3PD;
+	REG_BG3X = regBG3X;
+	REG_BG3Y = regBG3Y;
 }
 
 void hal_set_lcd_matrix(u8_t x, u8_t y, bool_t val)
@@ -223,7 +241,7 @@ hal_t tama_hal = {
     .play_frequency = play_frequency,
 
     .sleep_until = do_nothing,
-    .update_screen = &hal_update_screen,
+    .update_screen = do_nothing,
     .handler = do_nothing
 };
 u8 LCD_BUFFER[1024];

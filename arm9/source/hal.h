@@ -33,6 +33,8 @@ extern const bool_t icons[ICON_NUM][ICON_SIZE][ICON_SIZE];
 
 extern void hal_set_lcd_matrix(u8_t x, u8_t y, bool_t val);
 extern void hal_set_lcd_icon(u8_t icon, bool_t val);
+extern void set_frequency(u32_t freq);
+extern void play_frequency(bool_t en);
 
 #ifdef __cplusplus
 }

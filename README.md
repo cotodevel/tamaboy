@@ -35,6 +35,5 @@ Since this is a TGDS project, you can follow the same steps, as, for example, ht
 TGDS Port status:
 
 Todo: 
-- move tamagotchi process to its own rendering window instead of hardcoded VRAM
 - sound
 - RTC and filesystem support to allow the tamagotchi to live even if console is turned off.
