@@ -67,7 +67,6 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
 	}
 	
 	//tama setup
-    setup_vram();
     tamalib_register_hal(&tama_hal);
     tamalib_init(g_program, NULL, 1000);
     cpu_set_speed(0);

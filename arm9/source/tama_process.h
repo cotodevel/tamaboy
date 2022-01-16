@@ -32,9 +32,7 @@
 extern "C" {
 #endif
 
-extern void setup_vram(void);
 extern void tama_process();
-
 extern u32* cycle_count;
 extern u32 next_frame_count;
 extern int next_frame_overflow;

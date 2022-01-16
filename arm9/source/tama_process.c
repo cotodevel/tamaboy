@@ -19,32 +19,6 @@ int next_frame_overflow=0;
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
-void setup_vram(void) {
-    int i;
-	
-    
-    /* set up sound */
-	//todo: sound
-	/*
-    REG_SOUNDCNT_X = 0x80;
-    REG_SOUNDCNT_L=0x0077;
-    REG_SOUNDCNT_H = 2;
-    REG_SOUND1CNT_L=0x0;
-    REG_SOUND1CNT_H= 2<<6 | 15<<12;
-    REG_SOUND1CNT_X= 1<<15;
-	*/
-
-    /* set up lcd icon variables */
-    show_overlay = 0;
-    lcd_icon_state = 0;
-
-	
-	  
-}
-
-#ifdef ARM9
-__attribute__((section(".itcm")))
-#endif
 void tama_process(){
 	
 	// process buttons 
@@ -52,8 +26,6 @@ void tama_process(){
 	hw_set_button(BTN_LEFT, (i&(KEY_SELECT|KEY_LEFT))?1:0);
 	hw_set_button(BTN_MIDDLE, (i&(KEY_A|KEY_UP|KEY_DOWN))?1:0);
 	hw_set_button(BTN_RIGHT, (i&(KEY_B|KEY_RIGHT))?1:0);
-	if (i & KEY_START)
-		show_overlay = 1;
 	// set number of cycles to next frame 
 	next_frame_count += 546;
 	next_frame_overflow += 0xa;

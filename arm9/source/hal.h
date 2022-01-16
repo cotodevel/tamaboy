@@ -1,10 +1,6 @@
 #ifndef __hal_h__
 #define __hal_h__
 
-static int* const TILES = (int*)0x0600c000;
-static u16* const LCD_MAP = (u16*)0x06000000; /* 1k */
-static u16* const ICONS_MAP = (u16*)0x06000800; /* 256 bytes */
-
 #define PIXEL_SIZE					3
 #define ICON_SIZE					8
 #define ICON_STRIDE_X					24
@@ -21,10 +17,6 @@ extern "C"{
 #endif
 
 extern hal_t tama_hal;
-extern u8 LCD_BUFFER[1024];
-extern int show_overlay;
-extern int lcd_icon_state;
-extern void copy_mono_pixels(int* dest, int graphics, char zero, char one);
 extern void ClrBuf();
 extern void hal_update_screen(void);
 extern bool_t matrix_buffer[LCD_HEIGHT][LCD_WIDTH];
