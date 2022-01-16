@@ -13,15 +13,11 @@ d-pad Left, UpDown and Right. Or use the touchscreen controls
 The same buttons are also mapped to Select, A and B respectively. This mapping
 is intended to be as intuitive as possible to navigate the device's menus.
 
-Normally only the dot-matrix "pixels" are shown on screen. The eight lcd icons
-normally above and below the dot-matrix display are displayed as on overlay when
-needed.
-
-Press and hold the start button to show the lcd icon overlay. The overlay is
-shown for 3 seconds when an icon changes. Press start to dismiss.
-
 NB: Make sure to set the clock or your egg will never hatch. There should be
 animated arrows on the clock screen.
+
+Saving: Press the Save & Exit button. If you're using hardware, it should turn off automatically. Still, you should be greeted by a message confirming to shut off the NintendoDS.
+Reading Save: Wait 30 seconds from boot to load your saved tamagotchi. Don't do anything else during that time! The pet will appear when read process is done.
 
 ## Compile Time Dependencies
 

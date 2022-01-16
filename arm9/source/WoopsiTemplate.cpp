@@ -252,6 +252,11 @@ void WoopsiTemplate::handleClickEvent(const GadgetEventArgs& e)   {
 		//Tamagotchi Save & Exit Button Event
 		case 4:{
 			state_save(STATE_TEMPLATE);
+			printMessage("Tamagotchi has been saved correctly. It's safe to turn off unit now.");
+			shutdownNDSHardware();
+			while(1==1){
+				IRQWait(0, IRQ_VBLANK);
+			}
 		}	
 		break;
 		
