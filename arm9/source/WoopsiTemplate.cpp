@@ -26,6 +26,8 @@
 #include "tama_process.h"
 #include "hal.h"
 #include "rom.h"
+#include "storage.h"
+#include "state.h"
 
 __attribute__((section(".dtcm")))
 WoopsiTemplate * WoopsiTemplateProc = NULL;
@@ -71,13 +73,13 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
     tamalib_init(g_program, NULL, 1000);
     cpu_set_speed(0);
     cycle_count = cpu_get_state()->tick_counter;
-    // enable interrupts //no, TGDS API
-    //REG_IME = 0;
-    //REG_IE |= 1;
-    //REG_DISPSTAT |= 8;
-    //*(int*)0x03007FFC = (int)&interrupt_handler; 
-    //REG_IME = 1;
-	
+    
+	//restore last state
+	globalStatePos = 0;
+	if(state_check_if_used(globalStatePos + 1) == 1){
+	  //Exists? Loaded state now.
+	}
+
 	//render TGDSLogo from a LZSS compressed file
 	RenderTGDSLogoMainEngine((uint8*)&TGDSLogoLZSSCompressed[0], TGDSLogoLZSSCompressed_size);
 

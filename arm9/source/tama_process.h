@@ -37,10 +37,10 @@ extern u32* cycle_count;
 extern u32 next_frame_count;
 extern int next_frame_overflow;
 extern void setPixel(int row, int col, u16 color);
-extern void draw_icon(uint8_t x, uint8_t y, uint8_t num, uint8_t v);
-extern void draw_square(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t v);
-extern uint8_t SetPix(uint8_t X, uint8_t Y);
-extern uint8_t ClrPix(uint8_t X, uint8_t Y);
+extern void draw_icon(uint8 x, uint8 y, uint8 num, uint8 v);
+extern void draw_square(uint8 x, uint8 y, uint8 w, uint8 h, uint8 v);
+extern uint8 SetPix(uint8 X, uint8 Y);
+extern uint8 ClrPix(uint8 X, uint8 Y);
 
 #ifdef __cplusplus
 }

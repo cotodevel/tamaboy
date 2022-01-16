@@ -59,9 +59,9 @@ void setPixel(int row, int col, u16 color) {
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
-void draw_icon(uint8_t x, uint8_t y, uint8_t num, uint8_t v)
+void draw_icon(uint8 x, uint8 y, uint8 num, uint8 v)
 {
-	uint8_t i, j;
+	uint8 i, j;
 
 	if (v) {
 		for (j = 0; j < ICON_SIZE; j++) {
@@ -85,16 +85,16 @@ void draw_icon(uint8_t x, uint8_t y, uint8_t num, uint8_t v)
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
-uint8_t SetPix(uint8_t X, uint8_t Y){
-	setPixel((int)Y, (int)X, PixNorm); //same as uint8_t WritePix(int16_t X, int16_t Y, PixT V)
+uint8 SetPix(uint8 X, uint8 Y){
+	setPixel((int)Y, (int)X, PixNorm); //same as uint8 WritePix(int16_t X, int16_t Y, PixT V)
 	return 0;	
 }
 
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
-uint8_t ClrPix(uint8_t X, uint8_t Y){
-	setPixel((int)Y, (int)X, PixInv); //same as uint8_t WritePix(int16_t X, int16_t Y, PixT V)
+uint8 ClrPix(uint8 X, uint8 Y){
+	setPixel((int)Y, (int)X, PixInv); //same as uint8 WritePix(int16_t X, int16_t Y, PixT V)
 	return 0;
 }
 
@@ -102,9 +102,9 @@ uint8_t ClrPix(uint8_t X, uint8_t Y){
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
-void draw_square(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t v)
+void draw_square(uint8 x, uint8 y, uint8 w, uint8 h, uint8 v)
 {
-	uint8_t i, j;
+	uint8 i, j;
 
 	if (v) {
 		for (j = 0; j < h; j++) {

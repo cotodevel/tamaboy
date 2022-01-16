@@ -35,4 +35,4 @@ Since this is a TGDS project, you can follow the same steps, as, for example, ht
 TGDS Port status:
 
 Todo: 
-- RTC and filesystem support to allow the tamagotchi to live even if console is turned off.
+- RTC to allow the tamagotchi to keep time correctly.

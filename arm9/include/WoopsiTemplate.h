@@ -39,6 +39,8 @@ public:
 	Button* _play;
 	Button* _stop;
 	
+	//Todo: add a Save & Exit button which saves state into the FS
+	
 private:
 	Alert* _alert;
 };
