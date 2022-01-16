@@ -1,5 +1,5 @@
 # TamaLIB - A hardware agnostic Tamagotchi P1 emulation library
-[TamaLIB on GitHub](https://github.com/jcrona/tamalib/)
+
 
 ## Synopsis
 

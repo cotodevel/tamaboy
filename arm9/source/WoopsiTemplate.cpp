@@ -25,8 +25,8 @@
 #include "tamalib.h"
 #include "tama_process.h"
 #include "hal.h"
+#include "hw.h"
 #include "rom.h"
-#include "storage.h"
 #include "state.h"
 
 __attribute__((section(".dtcm")))
@@ -75,11 +75,9 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
     cycle_count = cpu_get_state()->tick_counter;
     
 	//restore last state
-	globalStatePos = 0;
-	if(state_check_if_used(globalStatePos + 1) == 1){
-	  //Exists? Loaded state now.
-	}
-
+	
+	//Load state now.
+	state_load(STATE_TEMPLATE);
 	//render TGDSLogo from a LZSS compressed file
 	RenderTGDSLogoMainEngine((uint8*)&TGDSLogoLZSSCompressed[0], TGDSLogoLZSSCompressed_size);
 
@@ -107,37 +105,25 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
 	// Controls
 	controlWindow->getClientRect(rect);
 
-	_Index = new Button(rect.x, rect.y, 41, 16, "Index");	//_Index->disable();
-	_Index->setRefcon(2);
+	_Index = new Button(rect.x, rect.y, 41, 16, "<");	
+	_Index->setRefcon(1);
 	controlWindow->addGadget(_Index);
 	_Index->addGadgetEventHandler(this);
 	
-	_lastFile = new Button(rect.x + 41, rect.y, 17, 16, "<");
-	_lastFile->setRefcon(3);
+	_lastFile = new Button(rect.x + 41, rect.y, 41, 16, "v");
+	_lastFile->setRefcon(2);
 	controlWindow->addGadget(_lastFile);
 	_lastFile->addGadgetEventHandler(this);
 	
-	_nextFile = new Button(rect.x + 41 + 17, rect.y, 17, 16, ">");
-	_nextFile->setRefcon(4);
+	_nextFile = new Button(rect.x + 41 + 41, rect.y, 41, 16, ">");
+	_nextFile->setRefcon(3);
 	controlWindow->addGadget(_nextFile);
 	_nextFile->addGadgetEventHandler(this);
 	
-	_play = new Button(rect.x + 41 + 17 + 17, rect.y, 40, 16, "Play");
-	_play->setRefcon(5);
+	_play = new Button(rect.x + 41 + 41 + 41, rect.y, 80, 16, "Save & Exit");
+	_play->setRefcon(4);
 	controlWindow->addGadget(_play);
 	_play->addGadgetEventHandler(this);
-	
-	_stop = new Button(rect.x + 41 + 17 + 17 + 40, rect.y, 40, 16, "Stop");
-	_stop->setRefcon(6);
-	controlWindow->addGadget(_stop);
-	_stop->addGadgetEventHandler(this);
-	
-	// Create FileRequester
-	_fileReq = new FileRequester(7, 10, 250, 150, "Files", "/", GADGET_DRAGGABLE | GADGET_DOUBLE_CLICKABLE);
-	_fileReq->setRefcon(1);
-	uiScreen->addGadget(_fileReq);
-	_fileReq->addGadgetEventHandler(this);
-	currentFileRequesterIndex = 0;
 	
 	_MultiLineTextBoxLogger = NULL;	//destroyable TextBox
 	
@@ -166,77 +152,34 @@ void WoopsiTemplate::handleValueChangeEvent(const GadgetEventArgs& e)   {
 
 	// Did a gadget fire this event?
 	if (e.getSource() != NULL) {
-	
-		// Is the gadget the file requester?
-		if (e.getSource()->getRefcon() == 1) {
-			
-			//Play WAV/ADPCM if selected from the FileRequester
-			WoopsiString strObj = ((FileRequester*)e.getSource())->getSelectedOption()->getText();
-			memset(currentFileChosen, 0, sizeof(currentFileChosen));
-			strObj.copyToCharArray(currentFileChosen);
-			
-			//Boot .NDS file! (homebrew only)
-			char tmpName[256];
-			char ext[256];
-			strcpy(tmpName, currentFileChosen);
-			separateExtension(tmpName, ext);
-			strlwr(ext);
-			if(strncmp(ext,".nds", 4) == 0){
-				char thisArgv[3][MAX_TGDSFILENAME_LENGTH];
-				memset(thisArgv, 0, sizeof(thisArgv));
-				strcpy(&thisArgv[0][0], currentFileChosen);	//Arg0:	NDS Binary loaded
-				strcpy(&thisArgv[1][0], "");				//Arg1: ARGV0
-				addARGV(2, (char*)&thisArgv);
-				TGDSMultibootRunNDSPayload(currentFileChosen);
-			}
-			else if(strncmp(ext,".bin", 4) == 0){
-				memset(args, 0, sizeof(args));
-				memset(argvs, 0, sizeof(argvs));//
-				
-				int argCount = 3;	
-				strcpy(&args[0][0], TGDSPROJECTNAME);	//Arg0: Parent TGDS Project name
-				strcpy(&args[1][0], currentFileChosen);	//Arg1: self TGDS-LinkedModule filename
-				strcpy(&args[2][0], "-d l");
-				
-				int i = 0;
-				for(i = 0; i < argCount; i++){
-					argvs[i] = (char*)&args[i][0];
-				}
-				
-				TGDSProjectRunLinkedModule(currentFileChosen, argCount, argvs, TGDSPROJECTNAME);
-			}
-			
-			pendPlay = 1;
-
-			/* 
-			//Destroyable Textbox implementation init
-			Rect rect;
-			uiScreen->getClientRect(rect);
-			_MultiLineTextBoxLogger = new MultiLineTextBox(rect.x, rect.y, 262, 170, "Loading\n...", Gadget::GADGET_DRAGGABLE, 5);
-			uiScreen->addGadget(_MultiLineTextBoxLogger);
-			
-			_MultiLineTextBoxLogger->removeText(0);
-			_MultiLineTextBoxLogger->moveCursorToPosition(0);
-			_MultiLineTextBoxLogger->appendText("File open OK: ");
-			_MultiLineTextBoxLogger->appendText(strObj);
-			_MultiLineTextBoxLogger->appendText("\n");
-			_MultiLineTextBoxLogger->appendText("Please wait calculating CRC32... \n");
-			
-			char arrBuild[256+1];
-			sprintf(arrBuild, "%s%x\n", "Invalid file: crc32 = 0x", crc32);
-			_MultiLineTextBoxLogger->appendText(WoopsiString(arrBuild));
-			
-			sprintf(arrBuild, "%s%x\n", "Expected: crc32 = 0x", 0x5F35977E);
-			_MultiLineTextBoxLogger->appendText(WoopsiString(arrBuild));
-			
-			waitForAOrTouchScreenButtonMessage(_MultiLineTextBoxLogger, "Press (A) or tap touchscreen to continue. \n");
-			
-			_MultiLineTextBoxLogger->invalidateVisibleRectCache();
-			uiScreen->eraseGadget(_MultiLineTextBoxLogger);
-			_MultiLineTextBoxLogger->destroy();	//same as delete _MultiLineTextBoxLogger;
-			//Destroyable Textbox implementation end
-			*/
-		}
+		/* 
+		//Destroyable Textbox implementation init
+		Rect rect;
+		uiScreen->getClientRect(rect);
+		_MultiLineTextBoxLogger = new MultiLineTextBox(rect.x, rect.y, 262, 170, "Loading\n...", Gadget::GADGET_DRAGGABLE, 5);
+		uiScreen->addGadget(_MultiLineTextBoxLogger);
+		
+		_MultiLineTextBoxLogger->removeText(0);
+		_MultiLineTextBoxLogger->moveCursorToPosition(0);
+		_MultiLineTextBoxLogger->appendText("File open OK: ");
+		_MultiLineTextBoxLogger->appendText(strObj);
+		_MultiLineTextBoxLogger->appendText("\n");
+		_MultiLineTextBoxLogger->appendText("Please wait calculating CRC32... \n");
+		
+		char arrBuild[256+1];
+		sprintf(arrBuild, "%s%x\n", "Invalid file: crc32 = 0x", crc32);
+		_MultiLineTextBoxLogger->appendText(WoopsiString(arrBuild));
+		
+		sprintf(arrBuild, "%s%x\n", "Expected: crc32 = 0x", 0x5F35977E);
+		_MultiLineTextBoxLogger->appendText(WoopsiString(arrBuild));
+		
+		waitForAOrTouchScreenButtonMessage(_MultiLineTextBoxLogger, "Press (A) or tap touchscreen to continue. \n");
+		
+		_MultiLineTextBoxLogger->invalidateVisibleRectCache();
+		uiScreen->eraseGadget(_MultiLineTextBoxLogger);
+		_MultiLineTextBoxLogger->destroy();	//same as delete _MultiLineTextBoxLogger;
+		//Destroyable Textbox implementation end
+		*/
 	}
 }
 
@@ -264,59 +207,55 @@ void WoopsiTemplate::handleLidOpen() {
 	}
 }
 
+void printMessage(char * msg){
+	//Destroyable Textbox implementation init
+	Rect rect;
+	WoopsiTemplateProc->uiScreen->getClientRect(rect);
+	WoopsiTemplateProc->_MultiLineTextBoxLogger = new MultiLineTextBox(rect.x, rect.y, 262, 170, "Loading\n...", Gadget::GADGET_DRAGGABLE, 5);
+	WoopsiTemplateProc->uiScreen->addGadget(WoopsiTemplateProc->_MultiLineTextBoxLogger);
+	
+	WoopsiTemplateProc->_MultiLineTextBoxLogger->removeText(0);
+	WoopsiTemplateProc->_MultiLineTextBoxLogger->moveCursorToPosition(0);
+	WoopsiTemplateProc->_MultiLineTextBoxLogger->appendText(":");
+	WoopsiTemplateProc->_MultiLineTextBoxLogger->appendText("\n");
+	
+	WoopsiTemplateProc->_MultiLineTextBoxLogger->appendText(WoopsiString(msg));
+	
+	WoopsiTemplateProc->waitForAOrTouchScreenButtonMessage(WoopsiTemplateProc->_MultiLineTextBoxLogger, "Press (A) or tap touchscreen to continue. \n");
+	
+	WoopsiTemplateProc->_MultiLineTextBoxLogger->invalidateVisibleRectCache();
+	WoopsiTemplateProc->uiScreen->eraseGadget(WoopsiTemplateProc->_MultiLineTextBoxLogger);
+	WoopsiTemplateProc->_MultiLineTextBoxLogger->destroy();	//same as delete _MultiLineTextBoxLogger;
+	//Destroyable Textbox implementation end
+}
+
 void WoopsiTemplate::handleClickEvent(const GadgetEventArgs& e)   {
 	switch (e.getSource()->getRefcon()) {
-		//_Index Event
+		//Tamagotchi Left Button Event
+		case 1:{
+			bankedButtons |= KEY_LEFT;
+		}	
+		break;
+		
+		//Tamagotchi Middle Button Event
 		case 2:{
-			//Get fileRequester size, if > 0, set the first element selected
-			FileRequester * freqInst = _fileReq;
-			FileListBox* freqListBox = freqInst->getInternalListBoxObject();
-			if(freqListBox->getOptionCount() > 0){
-				freqListBox->setSelectedIndex(0);
-			}
-			currentFileRequesterIndex = 0;
+			bankedButtons |= KEY_DOWN;
 		}	
 		break;
 		
-		//_lastFile Event
+		//Tamagotchi Right Button Event
 		case 3:{
-			FileRequester * freqInst = _fileReq;
-			FileListBox* freqListBox = freqInst->getInternalListBoxObject();
-			if(currentFileRequesterIndex > 0){
-				currentFileRequesterIndex--;
-			}
-			if(freqListBox->getOptionCount() > 0){
-				freqListBox->setSelectedIndex(currentFileRequesterIndex);
-			}
+			bankedButtons |= KEY_RIGHT;
 		}	
 		break;
 		
-		//_nextFile Event
+		//Tamagotchi Save & Exit Button Event
 		case 4:{
-			FileRequester * freqInst = _fileReq;
-			FileListBox* freqListBox = freqInst->getInternalListBoxObject();
-			if(currentFileRequesterIndex < (freqListBox->getOptionCount() - 1) ){
-				currentFileRequesterIndex++;
-				freqListBox->setSelectedIndex(currentFileRequesterIndex);
-			}
+			state_save(STATE_TEMPLATE);
 		}	
 		break;
 		
-		//_play Event
-		case 5:{
-			//Play WAV/ADPCM if selected from the FileRequester
-			WoopsiString strObj = _fileReq->getSelectedOption()->getText();
-			memset(currentFileChosen, 0, sizeof(currentFileChosen));
-			strObj.copyToCharArray(currentFileChosen);
-			pendPlay = 1;
-		}	
-		break;
 		
-		//_stop Event
-		case 6:{
-			pendPlay = 2;
-		}	
-		break;
 	}
 }
 
@@ -331,25 +270,6 @@ void Woopsi::ApplicationMainLoop()  {
 	//Earlier.. main from Woopsi SDK.
 	
 	//Handle TGDS stuff...
-	
-	switch(pendPlay){
-		case(1):{
-			internalCodecType = playSoundStream(currentFileChosen, _FileHandleVideo, _FileHandleAudio);
-			if(internalCodecType == SRC_NONE){
-				//stop right now
-				pendPlay = 2;
-			}
-			else{
-				pendPlay = 0;
-			}
-		}
-		break;
-		case(2):{
-			stopSoundStreamUser();
-			pendPlay = 0;
-		}
-		break;
-	}
 	
 	//tama process
 	tama_process();

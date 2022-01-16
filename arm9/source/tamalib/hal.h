@@ -38,6 +38,22 @@ typedef enum {
  * All pointers MUST be implemented, but some implementations can be left empty.
  */
 typedef struct {
+	/* Memory allocation functions
+	 * NOTE: Needed only if breakpoints support is required.
+	 */
+	void * (*malloc)(u32_t size);
+	void (*free)(void *ptr);
+
+	/* What to do if the CPU has halted
+	 */
+	void (*halt)(void);
+
+	/* Log related function
+	 * NOTE: Needed only if log messages are required.
+	 */
+	bool_t (*is_log_enabled)(log_level_t level);
+	void (*log)(log_level_t level, char *buff, ...);
+
 	/* Clock related functions
 	 * NOTE: Timestamps granularity is configured with tamalib_init(), an accuracy
 	 * of ~30 us (1/32768) is required for a cycle accurate emulation.

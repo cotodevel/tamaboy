@@ -1,5 +1,5 @@
 /*
- * MCUGotchi - A Tamagotchi P1 emulator for microcontrollers
+ * TamaTool - A cross-platform Tamagotchi P1 explorer
  *
  * Copyright (C) 2021 Jean-Christophe Rona <jc@rona.fr>
  *
@@ -17,177 +17,325 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
 #include "tamalib.h"
-#include "storage.h"
 #include "state.h"
 #include "fatfslayerTGDS.h"
+#include "debugNocash.h"
+#include "WoopsiTemplate.h"
 
-static u32 state_buf[STATE_SLOT_SIZE];
+#define STATE_FILE_MAGIC				"TLST"
+#define STATE_FILE_VERSION				2
 
-void state_save(uint8 slot)
+static uint32_t find_next_slot(void)
 {
-	state_t *state;
-	u32 slot_offset;
-	u32 pos = 0;
-	u32 i;
+	char path[256];
+	uint32_t i = 0;
 
-	if (slot > STATE_SLOTS_NUM) {
-		return;
-	}
-
-	/* Find the right offset for that slot */
-	slot_offset = STORAGE_SLOTS_OFFSET + (slot - 1) * STATE_SLOT_SIZE;
-
-	state = tamalib_get_state();
-
-	/* Set the slot as used */
-	state_buf[pos++] = 1;
-
-	/* All fields are written following the struct order */
-	state_buf[pos++] = *(state->pc) & 0x1FFF;
-	state_buf[pos++] = *(state->x) & 0xFFF;
-	state_buf[pos++] = *(state->y) & 0xFFF;
-	state_buf[pos++] = *(state->a) & 0xF;
-	state_buf[pos++] = *(state->b) & 0xF;
-	state_buf[pos++] = *(state->np) & 0x1F;
-	state_buf[pos++] = *(state->sp) & 0xFF;
-	state_buf[pos++] = *(state->flags) & 0xF;
-	state_buf[pos++] = *(state->tick_counter);
-	state_buf[pos++] = *(state->clk_timer_timestamp);
-	state_buf[pos++] = *(state->prog_timer_timestamp);
-	state_buf[pos++] = *(state->prog_timer_enabled) & 0x1;
-	state_buf[pos++] = *(state->prog_timer_data) & 0xFF;
-	state_buf[pos++] = *(state->prog_timer_rld) & 0xFF;
-	state_buf[pos++] = *(state->call_depth);
-
-	for (i = 0; i < INT_SLOT_NUM; i++) {
-		state_buf[pos++] = state->interrupts[i].factor_flag_reg & 0xF;
-		state_buf[pos++] = state->interrupts[i].mask_reg & 0xF;
-		state_buf[pos++] = state->interrupts[i].triggered & 0x1;
-	}
-
-	/* First 640 half bytes correspond to the RAM */
-	for (i = 0; i < 640; i++) {
-		((uint8 *) &state_buf[pos])[i] = state->memory[i];
-	}
-	pos += (640 + sizeof(u32) - 1)/sizeof(u32);
-
-	/* I/Os are from 0xF00 to 0xF7F */
-	for (i = 0; i < 160; i++) {
-		((uint8 *) &state_buf[pos])[i] = state->memory[i + 0xF00];
-	}
-	pos += (160 + sizeof(u32) - 1)/sizeof(u32);
-
-	storage_write(slot_offset, state_buf, STATE_SLOT_SIZE);
-}
-
-void state_load(uint8 slot)
-{
-	state_t *state;
-	u32 slot_offset;
-	u32 pos = 0;
-	u32 i;
-
-	/* Find the right offset for that slot */
-	slot_offset = STORAGE_SLOTS_OFFSET + (slot - 1) * STATE_SLOT_SIZE;
-
-	storage_read(slot_offset, state_buf, STATE_SLOT_SIZE);
-
-	state = tamalib_get_state();
-
-	/* Check is the slot is used */
-	if (!state_buf[pos++]) {
-		return;
-	}
-
-	/* All fields are written following the struct order */
-	*(state->pc) = state_buf[pos++] & 0x1FFF;
-	*(state->x) = state_buf[pos++] & 0xFFF;
-	*(state->y) = state_buf[pos++] & 0xFFF;
-	*(state->a) = state_buf[pos++] & 0xF;
-	*(state->b) = state_buf[pos++] & 0xF;
-	*(state->np) = state_buf[pos++] & 0x1F;
-	*(state->sp) = state_buf[pos++] & 0xFF;
-	*(state->flags) = state_buf[pos++] & 0xF;
-	*(state->tick_counter) = state_buf[pos++];
-	*(state->clk_timer_timestamp) = state_buf[pos++];
-	*(state->prog_timer_timestamp) = state_buf[pos++];
-	*(state->prog_timer_enabled) = state_buf[pos++] & 0x1;
-	*(state->prog_timer_data) = state_buf[pos++] & 0xFF;
-	*(state->prog_timer_rld) = state_buf[pos++] & 0xFF;
-	*(state->call_depth) = state_buf[pos++];
-
-	for (i = 0; i < INT_SLOT_NUM; i++) {
-		state->interrupts[i].factor_flag_reg = state_buf[pos++] & 0xF;
-		state->interrupts[i].mask_reg = state_buf[pos++] & 0xF;
-		state->interrupts[i].triggered = state_buf[pos++] & 0x1;
-	}
-
-	/* First 640 half bytes correspond to the RAM */
-	for (i = 0; i < 640; i++) {
-		state->memory[i] = ((uint8 *) &state_buf[pos])[i];
-	}
-	pos += (640 + sizeof(u32) - 1)/sizeof(u32);
-
-	/* I/Os are from 0xF00 to 0xF7F */
-	for (i = 0; i < 160; i++) {
-		state->memory[i + 0xF00] = ((uint8 *) &state_buf[pos])[i];
-	}
-	pos += (160 + sizeof(u32) - 1)/sizeof(u32);
-
-	tamalib_refresh_hw();
-}
-
-void state_erase(uint8 slot)
-{
-	u32 slot_offset;
-	u32 i;
-
-	/* Find the right offset for that slot */
-	slot_offset = STORAGE_SLOTS_OFFSET + (slot - 1) * STATE_SLOT_SIZE;
-
-	storage_read(slot_offset, state_buf, STATE_SLOT_SIZE);
-
-	/* Check is the slot is used */
-	if (!state_buf[0]) {
-		return;
-	}
-
-	for (i = 0; i < STATE_SLOT_SIZE; i++) {
-		state_buf[i] = 0;
-	}
-
-	storage_write(slot_offset, state_buf, STATE_SLOT_SIZE);
-}
-
-/*
-if(state_check_if_used(pos + 1) == 1){
-  //used
-}
-else {
-  //free
-}
-*/
-uint8 state_check_if_used(uint8 slot){
-	if (FileExists(SAV_FILENAME) != FT_FILE){
-		//save missing. Create it
-		FILE * fout = fopen(SAV_FILENAME, "w+");
-		if(fout != NULL){
-			//Initialize savefile: (STATE_SLOT_SIZE * sizeof(u32) * STATE_SLOTS_NUM)
-			u8 * initBuff = (u8*)TGDSARM9Malloc(STATE_SLOT_SIZE * sizeof(u32) * STATE_SLOTS_NUM);
-			fwrite(initBuff, 1, (int)(STATE_SLOT_SIZE * sizeof(u32) * STATE_SLOTS_NUM), fout);
-			TGDSARM9Free(initBuff);
-			fclose(fout);
+	for (i = 0;; i++) {
+		sprintf(path, STATE_TEMPLATE, i);
+		if (FileExists(path) == FT_FILE) {
+			nocashMessage("find_next_slot(): found!");
+			break;
 		}
 	}
+
+	return i;
+}
+
+void state_find_next_name(char *path)
+{
+	sprintf(path, STATE_TEMPLATE, find_next_slot());
+}
+
+void state_find_last_name(char *path)
+{
+	uint32_t num = find_next_slot();
+
+	if (num > 0) {
+		sprintf(path, STATE_TEMPLATE, num - 1);
+	} else {
+		path[0] = '\0';
+	}
+}
+
+void state_save(char *path)
+{
+	FILE *f;
+	state_t *state;
+	uint8_t buf[4];
+	uint32_t num = 0;
+	uint32_t i;
+	char dbgBuf[128];
 	
-	u32 slot_offset;
-	/* Find the right offset for that slot */
-	slot_offset = STORAGE_SLOTS_OFFSET + (slot - 1) * STATE_SLOT_SIZE;
+	state = tamalib_get_state();
+	f = fopen(path, "w+");
+	if (f == NULL) {
+		//fprintf(stderr, "FATAL: Cannot create state file \"%s\" !\n", path);
+		sprintf(dbgBuf, "FATAL: Cannot create state file \"%s\" !\n", path);
+		nocashMessage(dbgBuf);
+		return;
+	}
+	
+	//Build the file
+	int toWrite = (17 + INT_SLOT_NUM * 3 + MEM_RAM_SIZE + MEM_IO_SIZE);
+	u8 * fillMem = (u8*)TGDSARM9Malloc(toWrite);
+	int written = fwrite(fillMem, 1, toWrite, f);
+	TGDSARM9Free(fillMem);
+	
+	//Writeback changes
+	sint32 FDToSync = fileno(f);
+	fsync(FDToSync);
+	
+	sprintf(dbgBuf, "New file: %s : Initialized %d bytes\n", path, written);
+	nocashMessage(dbgBuf);
+	fseek(f, 0, SEEK_SET);
+	//fclose(f);
+	
+	
+	/* First the magic, then the version, and finally the fields of
+	 * the state_t struct written as u8, u16 little-endian or u32
+	 * little-endian following the struct order
+	 */
+	buf[0] = (uint8_t) STATE_FILE_MAGIC[0];
+	buf[1] = (uint8_t) STATE_FILE_MAGIC[1];
+	buf[2] = (uint8_t) STATE_FILE_MAGIC[2];
+	buf[3] = (uint8_t) STATE_FILE_MAGIC[3];
+	num += fwrite(buf, 1, 4, f);
 
-	storage_read(slot_offset, state_buf, STATE_SLOT_SIZE);
+	buf[0] = STATE_FILE_VERSION & 0xFF;
+	num += fwrite(buf, 1, 1, f);
 
-	/* Check is the slot is used */
-	return state_buf[0];
+	buf[0] = *(state->pc) & 0xFF;
+	buf[1] = (*(state->pc) >> 8) & 0x1F;
+	num += fwrite(buf, 1, 2, f);
+
+	buf[0] = *(state->x) & 0xFF;
+	buf[1] = (*(state->x) >> 8) & 0xF;
+	num += fwrite(buf, 1, 2, f);
+
+	buf[0] = *(state->y) & 0xFF;
+	buf[1] = (*(state->y) >> 8) & 0xF;
+	num += fwrite(buf, 1, 2, f);
+
+	buf[0] = *(state->a) & 0xF;
+	num += fwrite(buf, 1, 1, f);
+
+	buf[0] = *(state->b) & 0xF;
+	num += fwrite(buf, 1, 1, f);
+
+	buf[0] = *(state->np) & 0x1F;
+	num += fwrite(buf, 1, 1, f);
+
+	buf[0] = *(state->sp) & 0xFF;
+	num += fwrite(buf, 1, 1, f);
+
+	buf[0] = *(state->flags) & 0xF;
+	num += fwrite(buf, 1, 1, f);
+
+	buf[0] = *(state->tick_counter) & 0xFF;
+	buf[1] = (*(state->tick_counter) >> 8) & 0xFF;
+	buf[2] = (*(state->tick_counter) >> 16) & 0xFF;
+	buf[3] = (*(state->tick_counter) >> 24) & 0xFF;
+	num += fwrite(buf, 1, 4, f);
+
+	buf[0] = *(state->clk_timer_timestamp) & 0xFF;
+	buf[1] = (*(state->clk_timer_timestamp) >> 8) & 0xFF;
+	buf[2] = (*(state->clk_timer_timestamp) >> 16) & 0xFF;
+	buf[3] = (*(state->clk_timer_timestamp) >> 24) & 0xFF;
+	num += fwrite(buf, 1, 4, f);
+
+	buf[0] = *(state->prog_timer_timestamp) & 0xFF;
+	buf[1] = (*(state->prog_timer_timestamp) >> 8) & 0xFF;
+	buf[2] = (*(state->prog_timer_timestamp) >> 16) & 0xFF;
+	buf[3] = (*(state->prog_timer_timestamp) >> 24) & 0xFF;
+	num += fwrite(buf, 1, 4, f);
+
+	buf[0] = *(state->prog_timer_enabled) & 0x1;
+	num += fwrite(buf, 1, 1, f);
+
+	buf[0] = *(state->prog_timer_data) & 0xFF;
+	num += fwrite(buf, 1, 1, f);
+
+	buf[0] = *(state->prog_timer_rld) & 0xFF;
+	num += fwrite(buf, 1, 1, f);
+
+	buf[0] = *(state->call_depth) & 0xFF;
+	buf[1] = (*(state->call_depth) >> 8) & 0xFF;
+	buf[2] = (*(state->call_depth) >> 16) & 0xFF;
+	buf[3] = (*(state->call_depth) >> 24) & 0xFF;
+	num += fwrite(buf, 1, 4, f);
+	
+	FDToSync = fileno(f);
+	fsync(FDToSync);
+	
+	for (i = 0; i < INT_SLOT_NUM; i++) {
+		buf[0] = state->interrupts[i].factor_flag_reg & 0xF;
+		num += fwrite(buf, 1, 1, f);
+
+		buf[0] = state->interrupts[i].mask_reg & 0xF;
+		num += fwrite(buf, 1, 1, f);
+
+		buf[0] = state->interrupts[i].triggered & 0x1;
+		num += fwrite(buf, 1, 1, f);
+		
+		FDToSync = fileno(f);
+		fsync(FDToSync);
+	
+	}
+
+	/* First 640 half bytes correspond to the RAM */
+	for (i = 0; i < MEM_RAM_SIZE; i++) {
+		buf[0] = state->memory[i + MEM_RAM_ADDR] & 0xF;
+		num += fwrite(buf, 1, 1, f);
+		
+		FDToSync = fileno(f);
+		fsync(FDToSync);
+	
+	}
+
+	/* I/Os are from 0xF00 to 0xF7F */
+	for (i = 0; i < MEM_IO_SIZE; i++) {
+		buf[0] = state->memory[i + MEM_IO_ADDR] & 0xF;
+		num += fwrite(buf, 1, 1, f);
+		
+		FDToSync = fileno(f);
+		fsync(FDToSync);
+	
+	}
+
+	if (num != (17 + INT_SLOT_NUM * 3 + MEM_RAM_SIZE + MEM_IO_SIZE)) {
+		//fprintf(stderr, "FATAL: Failed to write to state file \"%s\" %u %u !\n", path, num, (23 + INT_SLOT_NUM * 3 + MEMORY_SIZE));
+		sprintf(dbgBuf, "FATAL: Failed to write to state file \"%s\" %u %u !\n", path, num, (23 + INT_SLOT_NUM * 3 + MEMORY_SIZE));
+		//nocashMessage(dbgBuf);
+		printMessage((char *)dbgBuf);
+	}
+	else{
+		sprintf(dbgBuf, "STATE WRITTEN OK !\n");
+		printMessage((char *)dbgBuf);
+	}
+
+	fclose(f);
+}
+
+void state_load(char *path)
+{
+	FILE *f;
+	state_t *state;
+	uint8_t buf[4];
+	uint32_t num = 0;
+	uint32_t i;
+	char dbgBuf[128];
+	
+	state = tamalib_get_state();
+
+	f = fopen(path, "r");
+	if (f == NULL) {
+		//fprintf(stderr, "FATAL: Cannot open state file \"%s\" !\n", path);
+		sprintf(dbgBuf, "FATAL: Cannot open state file \"%s\" !\n", path);
+		nocashMessage(dbgBuf);
+		return;
+	}
+
+	/* First the magic, then the version, and finally the fields of
+	 * the state_t struct written as u8, u16 little-endian or u32
+	 * little-endian following the struct order
+	 */
+	num += fread(buf, 1, 4, f);
+	if (buf[0] != (uint8_t) STATE_FILE_MAGIC[0] || buf[1] != (uint8_t) STATE_FILE_MAGIC[1] ||
+		buf[2] != (uint8_t) STATE_FILE_MAGIC[2] || buf[3] != (uint8_t) STATE_FILE_MAGIC[3]) {
+		//fprintf(stderr, "FATAL: Wrong state file magic in \"%s\" !\n", path);
+		sprintf(dbgBuf, "FATAL: Wrong state file magic in \"%s\" !\n", path);
+		nocashMessage(dbgBuf);
+		return;
+	}
+
+	num += fread(buf, 1, 1, f);
+	if (buf[0] != STATE_FILE_VERSION) {
+		//fprintf(stderr, "FATAL: Unsupported version %u (expected %u) in state file \"%s\" !\n", buf[0], STATE_FILE_VERSION, path);
+		/* TODO: Handle migration at a point */
+		sprintf(dbgBuf, "FATAL: Unsupported version %u (expected %u) in state file \"%s\" !\n", buf[0], STATE_FILE_VERSION, path);
+		nocashMessage(dbgBuf);
+		return;
+	}
+
+	num += fread(buf, 1, 2, f);
+	*(state->pc) = buf[0] | ((buf[1] & 0x1F) << 8);
+
+	num += fread(buf, 1, 2, f);
+	*(state->x) = buf[0] | ((buf[1] & 0xF) << 8);
+
+	num += fread(buf, 1, 2, f);
+	*(state->y) = buf[0] | ((buf[1] & 0xF) << 8);
+
+	num += fread(buf, 1, 1, f);
+	*(state->a) = buf[0] & 0xF;
+
+	num += fread(buf, 1, 1, f);
+	*(state->b) = buf[0] & 0xF;
+
+	num += fread(buf, 1, 1, f);
+	*(state->np) = buf[0] & 0x1F;
+
+	num += fread(buf, 1, 1, f);
+	*(state->sp) = buf[0];
+
+	num += fread(buf, 1, 1, f);
+	*(state->flags) = buf[0] & 0xF;
+
+	num += fread(buf, 1, 4, f);
+	*(state->tick_counter) = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
+
+	num += fread(buf, 1, 4, f);
+	*(state->clk_timer_timestamp) = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
+
+	num += fread(buf, 1, 4, f);
+	*(state->prog_timer_timestamp) = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
+
+	num += fread(buf, 1, 1, f);
+	*(state->prog_timer_enabled) = buf[0] & 0x1;
+
+	num += fread(buf, 1, 1, f);
+	*(state->prog_timer_data) = buf[0];
+
+	num += fread(buf, 1, 1, f);
+	*(state->prog_timer_rld) = buf[0];
+
+	num += fread(buf, 1, 4, f);
+	*(state->call_depth) = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
+
+	for (i = 0; i < INT_SLOT_NUM; i++) {
+		num += fread(buf, 1, 1, f);
+		state->interrupts[i].factor_flag_reg = buf[0] & 0xF;
+
+		num += fread(buf, 1, 1, f);
+		state->interrupts[i].mask_reg = buf[0] & 0xF;
+
+		num += fread(buf, 1, 1, f);
+		state->interrupts[i].triggered = buf[0] & 0x1;
+	}
+
+	/* First 640 half bytes correspond to the RAM */
+	for (i = 0; i < MEM_RAM_SIZE; i++) {
+		num += fread(buf, 1, 1, f);
+		state->memory[i + MEM_RAM_ADDR] = buf[0] & 0xF;
+	}
+
+	/* I/Os are from 0xF00 to 0xF7F */
+	for (i = 0; i < MEM_IO_SIZE; i++) {
+		num += fread(buf, 1, 1, f);
+		state->memory[i + MEM_IO_ADDR] = buf[0] & 0xF;
+	}
+
+	if (num != (17 + INT_SLOT_NUM * 3 + MEM_RAM_SIZE + MEM_IO_SIZE)) {
+		//fprintf(stderr, "FATAL: Failed to read from state file \"%s\" !\n", path);
+		sprintf(dbgBuf, "FATAL: Failed to read from state file \"%s\" !\n", path);
+		printMessage((char *)dbgBuf);
+		//nocashMessage(dbgBuf);
+	}
+
+	fclose(f);
+	tamalib_refresh_hw();
 }

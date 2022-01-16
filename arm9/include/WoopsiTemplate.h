@@ -30,8 +30,6 @@ public:
 	
 	//Game User Interface screen (touchscreen mapped to Engine B)
 	AmigaScreen* uiScreen;
-	FileRequester* _fileReq;
-	int currentFileRequesterIndex;
 	MultiLineTextBox* _MultiLineTextBoxLogger;
 	Button* _Index;
 	Button* _lastFile;
@@ -52,13 +50,17 @@ private:
 extern "C" {
 #endif
 
+#ifdef __cplusplus
 extern WoopsiTemplate * WoopsiTemplateProc;
+#endif
+
 extern u32 pendPlay;
 extern char currentFileChosen[256+1];
 extern int textureID;
 extern float rotateX;
 extern float rotateY;
 extern float camDist;
+extern void printMessage(char * msg);
 
 #ifdef __cplusplus
 }

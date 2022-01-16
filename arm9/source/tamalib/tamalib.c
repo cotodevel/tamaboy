@@ -55,6 +55,16 @@ void tamalib_release(void)
 	cpu_release();
 }
 
+void tamalib_set_framerate(u8_t framerate)
+{
+	g_framerate = framerate;
+}
+
+u8_t tamalib_get_framerate(void)
+{
+	return g_framerate;
+}
+
 void tamalib_register_hal(hal_t *hal)
 {
 	g_hal = hal;
@@ -64,6 +74,7 @@ void tamalib_set_exec_mode(exec_mode_t mode)
 {
 	exec_mode = mode;
 	step_depth = cpu_get_depth();
+	cpu_sync_ref_timestamp();
 }
 
 void tamalib_step(void)
@@ -105,6 +116,22 @@ void tamalib_step(void)
 					step_depth = cpu_get_depth();
 				}
 				break;
+		}
+	}
+}
+
+void tamalib_mainloop(void)
+{
+	timestamp_t ts;
+
+	while (!g_hal->handler()) {
+		tamalib_step();
+
+		/* Update the screen @ g_framerate fps */
+		ts = g_hal->get_timestamp();
+		if (ts - screen_ts >= ts_freq/g_framerate) {
+			screen_ts = ts;
+			g_hal->update_screen();
 		}
 	}
 }

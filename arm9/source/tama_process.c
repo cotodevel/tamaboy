@@ -12,6 +12,7 @@
 #include "dsregs.h"
 #include "tama_process.h"
 
+u32 bankedButtons = 0;
 u32* cycle_count=NULL;
 u32 next_frame_count=0;
 int next_frame_overflow=0;
@@ -22,7 +23,13 @@ __attribute__((section(".itcm")))
 void tama_process(){
 	
 	// process buttons 
-	int i = ~REG_KEYINPUT;
+	int i = (~REG_KEYINPUT);
+	if(bankedButtons > 0){ //trap keys this time
+		i|= bankedButtons;
+		bankedButtons = 0;
+	}
+	
+	
 	hw_set_button(BTN_LEFT, (i&(KEY_SELECT|KEY_LEFT))?1:0);
 	hw_set_button(BTN_MIDDLE, (i&(KEY_A|KEY_UP|KEY_DOWN))?1:0);
 	hw_set_button(BTN_RIGHT, (i&(KEY_B|KEY_RIGHT))?1:0);

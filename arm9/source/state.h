@@ -1,5 +1,5 @@
 /*
- * MCUGotchi - A Tamagotchi P1 emulator for microcontrollers
+ * TamaTool - A cross-platform Tamagotchi P1 explorer
  *
  * Copyright (C) 2021 Jean-Christophe Rona <jc@rona.fr>
  *
@@ -22,25 +22,21 @@
 
 #include "typedefsTGDS.h"
 
-//User storage
-#define STATE_SLOTS_NUM					10 //the entire slot count in the FS
-#define STATE_SLOT_SIZE					256 // x (sizeof(u32)) = 1024 bytes each slot in FS
+#define STATE_TEMPLATE			((char*)"0:/ndstamaboy.sav")
 
-//Internal
-#define STORAGE_SLOTS_OFFSET				64 // in words (sizeof(u32))
 
 #endif /* _STATE_H_ */
 
+
 #ifdef __cplusplus
-extern "C" {
+extern "C"{
 #endif
 
-extern void state_save(uint8 slot);
-extern void state_load(uint8 slot);
-extern void state_erase(uint8 slot);
-extern uint8 state_check_if_used(uint8 slot);
+extern void state_find_next_name(char *path);
+extern void state_find_last_name(char *path);
+extern void state_save(char *path);
+extern void state_load(char *path);
 
 #ifdef __cplusplus
 }
 #endif
-
