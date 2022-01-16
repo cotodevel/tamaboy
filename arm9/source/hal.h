@@ -27,6 +27,7 @@ extern void hal_set_lcd_matrix(u8_t x, u8_t y, bool_t val);
 extern void hal_set_lcd_icon(u8_t icon, bool_t val);
 extern void set_frequency(u32_t freq);
 extern void play_frequency(bool_t en);
+extern timestamp_t hal_get_timestamp(void);
 
 #ifdef __cplusplus
 }

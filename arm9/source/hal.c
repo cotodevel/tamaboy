@@ -5,6 +5,8 @@
 #include "rom.h"
 #include "dmaTGDS.h"
 #include "tama_process.h"
+#include "clockTGDS.h"
+#include "ipcfifoTGDS.h"
 
 bool_t matrix_buffer[LCD_HEIGHT][LCD_WIDTH] = {{0}};
 bool_t icon_buffer[ICON_NUM] = {0};
@@ -96,8 +98,17 @@ static void do_nothing(void) {
     return;
 }
 
-static timestamp_t get_timestamp(void) {
-    return 0;
+//RTC
+time_t time_get(void){
+	struct sIPCSharedTGDS * TGDSIPC = TGDSIPCStartAddress;
+	time_t t = TGDSIPC->tmInst.tm_sec; 
+	uint32_t cnt = getNDSRTCInSeconds(); 
+	return (t << 23) | (cnt << 7);
+}
+
+timestamp_t hal_get_timestamp(void)
+{
+	return (timestamp_t)time_get();
 }
 
 static u16 thisFreq = 0;
@@ -196,7 +207,7 @@ void hal_set_lcd_icon(u8_t icon, bool_t val)
 
 /* global variables */
 hal_t tama_hal = {
-    .get_timestamp = get_timestamp,
+    .get_timestamp = &hal_get_timestamp,
     .set_lcd_matrix = &hal_set_lcd_matrix,
     .set_lcd_icon = &hal_set_lcd_icon,
     .set_frequency = set_frequency,

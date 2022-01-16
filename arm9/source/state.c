@@ -25,6 +25,7 @@
 #include "fatfslayerTGDS.h"
 #include "debugNocash.h"
 #include "WoopsiTemplate.h"
+#include "ipcfifoTGDS.h"
 
 #define STATE_FILE_MAGIC				"TLST"
 #define STATE_FILE_VERSION				2
@@ -222,7 +223,8 @@ void state_save(char *path)
 	
 	FS_saveFile(path, (char *)buf, 8192, true); //turns out filesize had to be 8192 bytes to write properly!
 	
-	sprintf(dbgBuf, "Written to state file \"%s\" !\n", path);
+	struct sIPCSharedTGDS * TGDSIPC = TGDSIPCStartAddress;
+	sprintf(dbgBuf, "Written to state file \"%s\"!\nClock:%d:%d:%d\n", path, TGDSIPC->tmInst.tm_hour, TGDSIPC->tmInst.tm_min, TGDSIPC->tmInst.tm_sec);
 	printMessage((char *)dbgBuf);
 	
 	TGDSARM9Free(buf);

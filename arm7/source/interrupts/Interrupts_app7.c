@@ -27,6 +27,14 @@ USA
 #include "wifi_arm7.h"
 #include "main.h"
 
+#include "ipcfifoTGDS.h"
+#include "spitscTGDS.h"
+#include <stdbool.h>
+
+#include "biosTGDS.h"
+#include "spiTGDS.h"
+#include "clockTGDS.h"
+
 //User Handler Definitions
 
 #ifdef ARM9
@@ -80,8 +88,9 @@ void HblankUser(){
 __attribute__((section(".itcm")))
 #endif
 void VblankUser(){
-	
-
+	struct sIPCSharedTGDS * sIPCSharedTGDSInst = (struct sIPCSharedTGDS *)0x027FF000;
+	//Handle Clock (should this one run on IRQs instead?)
+	sIPCSharedTGDSInst->ndsRTCSeconds = nds_get_time7();
 }
 
 #ifdef ARM9
