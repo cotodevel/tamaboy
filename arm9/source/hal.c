@@ -145,21 +145,28 @@ static void set_lcd_icon(u8_t icon, bool_t en) {
     }
 }
 
+static u16 thisFreq = 0;
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
 void set_frequency(u32_t freq) {
-    short const freq_table[] = {2016,2008,2000,1992,1984,1968,1951,1936};
-    int n = freq_table[freq];
-    //REG_SOUND1CNT_X = n | 1<<15; //todo sound
+    short const freq_table[] = {(2076<<4),2068<<4,2060<<4,2830<<5,2044<<4,2028<<4,2011<<4,1996<<4};
+    int n = freq_table[freq] + 125;
+	thisFreq = (u16)n;
 }
 
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
 void play_frequency(bool_t en) {
-    //if (en) REG_SOUNDCNT_L=0x1177; //todo sound
-    //else REG_SOUNDCNT_L=0x0077; //todo sound
+	int channel = 9; //PSG
+	//Bit24-26  Wave Duty    (0..7) ;HIGH=(N+1)*12.5%, LOW=(7-N)*12.5% (PSG only)
+	u8 wavDuty = 6;
+	u32 cnt   = SOUND_ONE_SHOT | SOUND_VOL(2) | SOUND_PAN(48) | (3 << 29) | (wavDuty << 24); //3=PSG/Noise)
+	if (en){
+		cnt = (SCHANNEL_ENABLE | cnt);
+	}
+	writeARM7SoundChannel(channel, cnt, thisFreq);
 }
 
 #ifdef ARM9
