@@ -251,11 +251,42 @@ void WoopsiTemplate::handleClickEvent(const GadgetEventArgs& e)   {
 		
 		//Tamagotchi Save & Exit Button Event
 		case 4:{
-			state_save(STATE_TEMPLATE);
-			printMessage("Tamagotchi has been saved correctly. It's safe to turn off unit now.");
-			shutdownNDSHardware();
+			//Destroyable Textbox implementation init
+			Rect rect;
+			WoopsiTemplateProc->uiScreen->getClientRect(rect);
+			WoopsiTemplateProc->_MultiLineTextBoxLogger = new MultiLineTextBox(rect.x, rect.y, 262, 170, "Loading\n...", Gadget::GADGET_DRAGGABLE, 5);
+			WoopsiTemplateProc->uiScreen->addGadget(WoopsiTemplateProc->_MultiLineTextBoxLogger);
+			
+			WoopsiTemplateProc->_MultiLineTextBoxLogger->removeText(0);
+			WoopsiTemplateProc->_MultiLineTextBoxLogger->moveCursorToPosition(0);
+			WoopsiTemplateProc->_MultiLineTextBoxLogger->appendText(":");
+			WoopsiTemplateProc->_MultiLineTextBoxLogger->appendText("\n");
+			
+			WoopsiTemplateProc->_MultiLineTextBoxLogger->appendText("Are you sure you want to Save & Exit?\n(A) No\n(B) Yes");
+			bool pressedB = false;
 			while(1==1){
-				IRQWait(0, IRQ_VBLANK);
+				scanKeys();
+				if(keysDown() & KEY_A){
+					break;
+				}
+				if(keysDown() & KEY_B){
+					pressedB = true;
+					break;
+				}
+			}
+			WoopsiTemplateProc->_MultiLineTextBoxLogger->invalidateVisibleRectCache();
+			WoopsiTemplateProc->uiScreen->eraseGadget(WoopsiTemplateProc->_MultiLineTextBoxLogger);
+			WoopsiTemplateProc->_MultiLineTextBoxLogger->destroy();	//same as delete _MultiLineTextBoxLogger;
+			//Destroyable Textbox implementation end
+			
+			
+			if(pressedB == true){
+				state_save(STATE_TEMPLATE);
+				printMessage("Tamagotchi has been saved correctly. It's safe to turn off unit now.");
+				shutdownNDSHardware();
+				while(1==1){
+					IRQWait(0, IRQ_VBLANK);
+				}
 			}
 		}	
 		break;

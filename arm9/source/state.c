@@ -95,6 +95,7 @@ void state_save(char *path)
 	state_t *state;
 	int bufOffset = 0;
 	u8 * buf = (u8*)TGDSARM9Malloc(8192);
+	buf+=(1024*1024*4); //cache gets in the way
 	
 	uint32_t num = 0;
 	uint32_t i;
@@ -227,6 +228,7 @@ void state_save(char *path)
 	sprintf(dbgBuf, "Written to state file \"%s\"!\nClock:%d:%d:%d\n", path, TGDSIPC->tmInst.tm_hour, TGDSIPC->tmInst.tm_min, TGDSIPC->tmInst.tm_sec);
 	printMessage((char *)dbgBuf);
 	
+	buf-=(1024*1024*4); //cache gets in the way
 	TGDSARM9Free(buf);
 }
 
@@ -243,6 +245,8 @@ void state_load(char *path)
 	state_t *state;
 	int bufOffset = 0;
 	u8 * buf = (u8*)TGDSARM9Malloc(8192);
+	buf+=(1024*1024*4); //cache gets in the way
+	
 	uint32_t i;
 	char dbgBuf[128];
 	
@@ -347,7 +351,8 @@ void state_load(char *path)
 		state->memory[i + MEM_IO_ADDR] = buf[bufOffset] & 0xF;
 		bufOffset++;
 	}
-
+	
+	buf-=(1024*1024*4); //cache gets in the way
 	TGDSARM9Free(buf);
 	fclose(f);
 	tamalib_refresh_hw();

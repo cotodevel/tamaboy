@@ -16,8 +16,11 @@ is intended to be as intuitive as possible to navigate the device's menus.
 NB: Make sure to set the clock or your egg will never hatch. There should be
 animated arrows on the clock screen.
 
+!!!!NOTE!!!!
 Saving: Press the Save & Exit button. If you're using hardware, it should turn off automatically. Still, you should be greeted by a message confirming to shut off the NintendoDS.
-Reading Save: Wait 30 seconds from boot to load your saved tamagotchi. Don't do anything else during that time! The pet will appear when read process is done.
+Reading Save: Wait up to 5 minutes from boot to load your saved tamagotchi! Don't do anything else during that time! The pet will appear when read process is done.
+If it takes more time, do not panic! It WILL load surely. The reason is because VBLANK IRQs on NDS are glued to tama cpu, and that slows boot time.
+!!!!!!!!!!!!
 
 ## Compile Time Dependencies
 
