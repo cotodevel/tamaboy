@@ -1,3 +1,5 @@
+Note: These sources were based originally from (https://github.com/jeffayle/tamaboy)
+
 ![tamaboy](img/tamaboy_nds.png)
 
 NTR/TWL SDK: TGDS1.65
