@@ -61,6 +61,8 @@ extern float rotateX;
 extern float rotateY;
 extern float camDist;
 extern void printMessage(char * msg);
+extern void disableWaitForVblankC();
+extern void enableWaitForVblankC();
 
 #ifdef __cplusplus
 }

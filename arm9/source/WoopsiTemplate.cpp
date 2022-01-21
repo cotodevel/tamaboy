@@ -29,6 +29,13 @@
 #include "rom.h"
 #include "state.h"
 
+void enableWaitForVblankC(){
+	WoopsiTemplateProc->enableWaitForVblank();
+}
+void disableWaitForVblankC(){
+	WoopsiTemplateProc->disableWaitForVblank();
+}
+
 __attribute__((section(".dtcm")))
 WoopsiTemplate * WoopsiTemplateProc = NULL;
 	
@@ -69,6 +76,7 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
 	}
 	
 	//tama setup
+	disableWaitForVblankC();
     tamalib_register_hal(&tama_hal);
     tamalib_init(g_program, NULL, 1000);
     cpu_set_speed(0);
@@ -77,6 +85,7 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
 	//restore last state
 	
 	//Load state now.
+	reEnableVblank = false;
 	state_load(STATE_TEMPLATE);
 	//render TGDSLogo from a LZSS compressed file
 	RenderTGDSLogoMainEngine((uint8*)&TGDSLogoLZSSCompressed[0], TGDSLogoLZSSCompressed_size);

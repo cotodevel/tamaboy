@@ -42,6 +42,8 @@ extern void draw_square(uint8 x, uint8 y, uint8 w, uint8 h, uint8 v);
 extern uint8 SetPix(uint8 X, uint8 Y);
 extern uint8 ClrPix(uint8 X, uint8 Y);
 extern u32 bankedButtons;
+extern bool reEnableVblank;
+
 #ifdef __cplusplus
 }
 #endif

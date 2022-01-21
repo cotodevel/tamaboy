@@ -90,9 +90,18 @@ void draw_icon(uint8 x, uint8 y, uint8 num, uint8 v)
 }
 
 #ifdef ARM9
+__attribute__((section(".dtcm")))
+#endif
+bool reEnableVblank = false;
+
+#ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
 uint8 SetPix(uint8 X, uint8 Y){
+	if(reEnableVblank == false){
+		enableWaitForVblankC();
+		reEnableVblank = true;
+	}
 	setPixel((int)Y, (int)X, PixNorm); //same as uint8 WritePix(int16_t X, int16_t Y, PixT V)
 	return 0;	
 }
@@ -101,7 +110,9 @@ uint8 SetPix(uint8 X, uint8 Y){
 __attribute__((section(".itcm")))
 #endif
 uint8 ClrPix(uint8 X, uint8 Y){
-	setPixel((int)Y, (int)X, PixInv); //same as uint8 WritePix(int16_t X, int16_t Y, PixT V)
+	if(reEnableVblank == true){
+		setPixel((int)Y, (int)X, PixInv); //same as uint8 WritePix(int16_t X, int16_t Y, PixT V)
+	}
 	return 0;
 }
 

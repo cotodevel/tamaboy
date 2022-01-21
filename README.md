@@ -20,8 +20,7 @@ animated arrows on the clock screen.
 
 !!!!NOTE!!!!
 Saving: Press the Save & Exit button. If you're using hardware, it should turn off automatically. Still, you should be greeted by a message confirming to shut off the NintendoDS.
-Reading Save: loading saved tamagotchi can take hours! It WILL load surely. The pet will appear when read process is done.
-I'm currently investigating a way to mitigate this issue.
+Reading Save: Loading saved tamagotchi happens automatically on boot. Sometimes it can take up to 10~ minutes, please wait.
 !!!!!!!!!!!!
 
 ## Compile Time Dependencies
