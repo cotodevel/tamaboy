@@ -26,6 +26,7 @@
 #include "debugNocash.h"
 #include "WoopsiTemplate.h"
 #include "ipcfifoTGDS.h"
+#include "nds_cp15_misc.h"
 
 #define STATE_FILE_MAGIC				"TLST"
 #define STATE_FILE_VERSION				2
@@ -102,6 +103,9 @@ void state_save(char *path)
 	char dbgBuf[128];
 	
 	state = tamalib_get_state();
+	coherent_user_range_by_size((uint32)state, sizeof(state_t));//write state_t to sd? make it coherent 
+	coherent_user_range_by_size((uint32)state->interrupts, sizeof(state->interrupts)); 
+	coherent_user_range_by_size((uint32)state->memory, sizeof(state->memory));
 	
 	/* First the magic, then the version, and finally the fields of
 	 * the state_t struct written as u8, u16 little-endian or u32
@@ -353,6 +357,11 @@ void state_load(char *path)
 	}
 	
 	buf-=(1024*1024*4); //cache gets in the way
+	coherent_user_range_by_size((uint32)state, sizeof(state_t)); //state_t reloaded? make cache coherent
+	coherent_user_range_by_size((uint32)state->interrupts, sizeof(state->interrupts)); 
+	coherent_user_range_by_size((uint32)state->memory, sizeof(state->memory));
+	
+	
 	TGDSARM9Free(buf);
 	fclose(f);
 	tamalib_refresh_hw();
