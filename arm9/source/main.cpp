@@ -35,7 +35,6 @@ USA
 #include "nds_cp15_misc.h"
 #include "fatfslayerTGDS.h"
 #include "utilsTGDS.h"
-#include "click_raw.h"
 #include "ima_adpcm.h"
 
 // Includes
@@ -52,6 +51,11 @@ bool stopSoundStreamUser(){
 
 void closeSoundUser(){
 	//Stubbed. Gets called when closing an audiostream of a custom audio decoder
+}
+
+//because virtual pet needs drums to start properly
+void playTamaIntro(){
+	playSoundStream("0:/drumSample.ima", _FileHandleVideo, _FileHandleAudio);
 }
 
 static inline void menuShow(){

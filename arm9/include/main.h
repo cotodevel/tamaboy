@@ -44,6 +44,7 @@ extern bool stopSoundStreamUser();
 extern void closeSoundUser();
 extern char args[8][MAX_TGDSFILENAME_LENGTH];
 extern char *argvs[8];
+extern void playTamaIntro();
 
 #ifdef __cplusplus
 }

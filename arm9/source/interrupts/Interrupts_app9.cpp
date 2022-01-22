@@ -89,6 +89,9 @@ __attribute__((section(".itcm")))
 void VblankUser(){
 	woopsiVblFunc();
 	
+	//Audio playback here....
+	updateStream();	
+	
 	//Timing reserved for 2D/3D rendering
 }
 

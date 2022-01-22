@@ -95,9 +95,7 @@ void VblankUser(){
 __attribute__((section(".itcm")))
 #endif
 void VcounterUser(){
-	struct sIPCSharedTGDS * sIPCSharedTGDSInst = (struct sIPCSharedTGDS *)0x027FF000;
-	//Handle Clock (should this one run on IRQs instead?)
-	sIPCSharedTGDSInst->ndsRTCSeconds = nds_get_time7();
+	
 }
 
 //Note: this event is hardware triggered from ARM7, on ARM9 a signal is raised through the FIFO hardware

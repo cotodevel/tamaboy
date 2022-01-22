@@ -11,6 +11,8 @@
 #include "rom.h"
 #include "dsregs.h"
 #include "tama_process.h"
+#include "soundTGDS.h"
+#include "main.h"
 
 u32 bankedButtons = 0;
 u32* cycle_count=NULL;
@@ -100,6 +102,7 @@ __attribute__((section(".itcm")))
 uint8 SetPix(uint8 X, uint8 Y){
 	if(reEnableVblank == false){
 		enableWaitForVblankC();
+		playTamaIntro();
 		reEnableVblank = true;
 	}
 	setPixel((int)Y, (int)X, PixNorm); //same as uint8 WritePix(int16_t X, int16_t Y, PixT V)
