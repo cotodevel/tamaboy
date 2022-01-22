@@ -177,13 +177,7 @@ void hal_update_screen(void){
 			draw_icon((i % 4) * ICON_STRIDE_X + ICON_OFFSET_X, (i / 4) * ICON_STRIDE_Y + ICON_OFFSET_Y, i, 1);
 		}
 	}
-	
-	//apply scaling to main engine
-	REG_BG3PA = stretch_x;
-	REG_BG3PB = 0; REG_BG3PC = 0;
-	REG_BG3PD = regBG3PD;
-	REG_BG3X = regBG3X;
-	REG_BG3Y = regBG3Y;
+	dmaTransferWord(3, (u32)TAMA_DRAW_BUFFER, (u32)VRAM_BUFFER, (uint32)(64*1024));
 }
 
 void hal_set_lcd_matrix(u8_t x, u8_t y, bool_t val)

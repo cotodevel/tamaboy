@@ -12,8 +12,9 @@
 #define OFFSET(r,c,w) ((r)*(w)+(c))
 #define VRAM_BUFFER            ((u16*)0x06000000)
 #define PIXEL_ENABLE (1<<15)
+#define TAMA_DRAW_BUFFER ((u16*)0x06880000)
 
-#define PixInv (u16)(RGB15(31,31,31))
+#define PixInv (u16)(RGB15(24,24,24))
 #define PixNorm (u16)(RGB15(0,0,0))
 
 //scaling scheme: modified from StellaDS 

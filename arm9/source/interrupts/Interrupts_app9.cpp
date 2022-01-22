@@ -28,7 +28,9 @@ USA
 #include "videoTGDS.h"
 #include "math.h"
 #include "imagepcx.h"
-#include "keypadTGDS.h"
+#include "dmaTGDS.h"
+#include "tama_process.h"
+#include "hal.h"
 
 //User Handler Definitions
 #include "woopsifuncs.h"
@@ -87,12 +89,13 @@ void HblankUser(){
 __attribute__((section(".itcm")))
 #endif
 void VblankUser(){
+	//Timing reserved for 2D/3D rendering
+	hal_update_screen();
+	
 	woopsiVblFunc();
 	
 	//Audio playback here....
 	updateStream();	
-	
-	//Timing reserved for 2D/3D rendering
 }
 
 #ifdef ARM9

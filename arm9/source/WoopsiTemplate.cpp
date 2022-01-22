@@ -76,6 +76,15 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
 	}
 	
 	//tama setup
+	//render TGDSLogo from a LZSS compressed file
+	RenderTGDSLogoMainEngine((uint8*)&TGDSLogoLZSSCompressed[0], TGDSLogoLZSSCompressed_size);
+	//apply scaling to main engine
+	REG_BG3PA = stretch_x;
+	REG_BG3PB = 0; REG_BG3PC = 0;
+	REG_BG3PD = regBG3PD;
+	REG_BG3X = regBG3X;
+	REG_BG3Y = regBG3Y;
+	
 	disableWaitForVblankC();
     tamalib_register_hal(&tama_hal);
     tamalib_init(g_program, NULL, 1000);
@@ -87,9 +96,6 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
 	//Load state now.
 	reEnableVblank = false;
 	state_load(STATE_TEMPLATE);
-	//render TGDSLogo from a LZSS compressed file
-	RenderTGDSLogoMainEngine((uint8*)&TGDSLogoLZSSCompressed[0], TGDSLogoLZSSCompressed_size);
-
 	Rect rect;
 
 	/** SuperBitmap preparation **/

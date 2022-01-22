@@ -22,11 +22,6 @@
 
 #include "hal.h"
 
-#define LCD_WIDTH			32
-#define LCD_HEIGHT			16
-
-#define ICON_NUM			8
-
 typedef enum {
 	BTN_STATE_RELEASED = 0,
 	BTN_STATE_PRESSED,

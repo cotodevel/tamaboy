@@ -55,14 +55,13 @@ void tama_process(){
 		tamalib_step();
 	}
 	
-	hal_update_screen();
 }
 
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
 void setPixel(int row, int col, u16 color) {
-	VRAM_BUFFER[OFFSET(row, col, SCREENWIDTH)] = color | PIXEL_ENABLE;
+	TAMA_DRAW_BUFFER[OFFSET(row, col, SCREENWIDTH)] = color | PIXEL_ENABLE;
 }
 
 #ifdef ARM9
