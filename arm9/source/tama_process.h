@@ -16,6 +16,7 @@
 
 #define PixInv (u16)(RGB15(24,24,24))
 #define PixNorm (u16)(RGB15(0,0,0))
+#define IconPixSelected (u16)(RGB15(31,31,0))
 
 //scaling scheme: modified from StellaDS 
 #define screenScale (u16)(120)
@@ -40,7 +41,7 @@ extern int next_frame_overflow;
 extern void setPixel(int row, int col, u16 color);
 extern void draw_icon(uint8 x, uint8 y, uint8 num, uint8 v);
 extern void draw_square(uint8 x, uint8 y, uint8 w, uint8 h, uint8 v);
-extern uint8 SetPix(uint8 X, uint8 Y);
+extern uint8 SetPix(uint8 X, uint8 Y, bool isSelectedIcon);
 extern uint8 ClrPix(uint8 X, uint8 Y);
 extern u32 bankedButtons;
 extern bool reEnableVblank;

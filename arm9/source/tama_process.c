@@ -75,7 +75,7 @@ void draw_icon(uint8 x, uint8 y, uint8 num, uint8 v)
 		for (j = 0; j < ICON_SIZE; j++) {
 			for (i = 0; i < ICON_SIZE; i++) {
 				if(icons[num][j][i]) {
-					SetPix(x + i, y + j);
+					SetPix(x + i, y + j, true);
 				}
 			}
 		}
@@ -98,13 +98,19 @@ bool reEnableVblank = false;
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
-uint8 SetPix(uint8 X, uint8 Y){
+uint8 SetPix(uint8 X, uint8 Y, bool isSelectedIcon){
 	if(reEnableVblank == false){
 		enableWaitForVblankC();
 		playTamaIntro();
 		reEnableVblank = true;
 	}
-	setPixel((int)Y, (int)X, PixNorm); //same as uint8 WritePix(int16_t X, int16_t Y, PixT V)
+	
+	if(isSelectedIcon == true){
+		setPixel((int)Y, (int)X, IconPixSelected);
+	}
+	else{
+		setPixel((int)Y, (int)X, PixNorm);
+	}
 	return 0;	
 }
 
@@ -129,7 +135,7 @@ void draw_square(uint8 x, uint8 y, uint8 w, uint8 h, uint8 v)
 	if (v) {
 		for (j = 0; j < h; j++) {
 			for (i = 0; i < w; i++) {
-				SetPix(x + i, y + j);
+				SetPix(x + i, y + j, false);
 			}
 		}
 	} else {
