@@ -46,11 +46,19 @@ USA
 #include <stdbool.h>
 #include "main.h"
 #include "wifi_arm9.h"
+#include "cpu.h"
+#include "tama_process.h"
 
 #endif
 
 #ifdef ARM9
 __attribute__((section(".itcm")))
+#endif
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
 #endif
 struct sIPCSharedTGDSSpecific* getsIPCSharedTGDSSpecific(){
 	struct sIPCSharedTGDSSpecific* sIPCSharedTGDSSpecificInst = (struct sIPCSharedTGDSSpecific*)(TGDSIPCUserStartAddress);
@@ -58,6 +66,12 @@ struct sIPCSharedTGDSSpecific* getsIPCSharedTGDSSpecific(){
 }
 
 //inherits what is defined in: ipcfifoTGDS.c
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif

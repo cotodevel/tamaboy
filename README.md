@@ -26,6 +26,8 @@ Saving: Press the Save & Exit button. If you're using hardware, it should turn o
 Reading Save: Loading saved tamagotchi happens automatically on boot. Sometimes it can take up to 10~ minutes or even more, please wait... it WILL load! A drumming intro will play when the pet has loaded.
 !!!!!!!!!!!!
 
+RTC: Implemented correctly. Reads from internal NDS RTC clock in real time!
+
 ## Compile Time Dependencies
 
 - TGDS (https://bitbucket.org/Coto88/toolchaingenericds/src)
@@ -36,12 +38,6 @@ Since this is a TGDS project, you can follow the same steps, as, for example, ht
 
 ## 
 Drums intro thanks to Thomas Drachmann - A Short Drum Solo
-
-
-TGDS Port status:
-
-Todo: 
-- RTC to allow the tamagotchi to keep time correctly.
 
 
 Coto

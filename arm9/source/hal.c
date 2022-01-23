@@ -99,16 +99,18 @@ static void do_nothing(void) {
 }
 
 //RTC
-time_t time_get(void){
-	struct sIPCSharedTGDS * TGDSIPC = TGDSIPCStartAddress;
-	time_t t = TGDSIPC->tmInst.tm_sec; 
-	uint32_t cnt = getNDSRTCInSeconds(); 
-	return (t << 23) | (cnt << 7);
-}
-
+#ifdef ARM9
+__attribute__((section(".itcm")))
+#endif
 timestamp_t hal_get_timestamp(void)
 {
-	return (timestamp_t)time_get();
+	//Sync to NDS RTC
+	struct sIPCSharedTGDS * TGDSIPC = TGDSIPCStartAddress;	
+	unsigned char hh = ((unsigned char)TGDSIPC->tmInst.tm_hour);
+    unsigned char mm = ((unsigned char)TGDSIPC->tmInst.tm_min);
+    unsigned char ss = ((unsigned char)TGDSIPC->tmInst.tm_sec);
+    convertHHMMSSDateTimeToTamaFormat(hh, mm, ss, (unsigned char *)&tama_io_memory[16]);
+	return (timestamp_t)0;
 }
 
 static u16 thisFreq = 0;

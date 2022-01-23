@@ -45,6 +45,8 @@ extern uint8 SetPix(uint8 X, uint8 Y, bool isSelectedIcon);
 extern uint8 ClrPix(uint8 X, uint8 Y);
 extern u32 bankedButtons;
 extern bool reEnableVblank;
+extern bool convertHHMMSSDateTimeToTamaFormat(unsigned char hh, unsigned char mm, unsigned char ss, unsigned char * tama_io_memorySource);
+extern void int2bcd(int i, char *bcd);
 
 #ifdef __cplusplus
 }

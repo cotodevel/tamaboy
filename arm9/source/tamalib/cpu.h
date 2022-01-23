@@ -124,6 +124,7 @@ extern bool_t cpu_init(const u12_t *program, breakpoint_t *breakpoints, u32_t fr
 extern void cpu_release(void);
 
 extern int cpu_step(void);
+extern u4_t tama_io_memory[MEMORY_SIZE];
 
 #ifdef __cplusplus
 }

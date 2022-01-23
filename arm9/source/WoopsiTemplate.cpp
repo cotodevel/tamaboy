@@ -29,16 +29,38 @@
 #include "rom.h"
 #include "state.h"
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 void enableWaitForVblankC(){
 	WoopsiTemplateProc->enableWaitForVblank();
 }
+
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 void disableWaitForVblankC(){
 	WoopsiTemplateProc->disableWaitForVblank();
 }
 
 __attribute__((section(".dtcm")))
 WoopsiTemplate * WoopsiTemplateProc = NULL;
-	
+
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 void WoopsiTemplate::startup(int argc, char **argv)   {
 	
 	//Init Main Engine (A) as 3D

@@ -37,8 +37,7 @@ USA
 //---------------------------------------------------------------------------------
 struct sIPCSharedTGDSSpecific {
 //---------------------------------------------------------------------------------
-	uint32 frameCounter7;	//VBLANK counter7
-	uint32 frameCounter9;	//VBLANK counter9
+	uint32 dummy1;	
 };
 
 #ifdef ARM9

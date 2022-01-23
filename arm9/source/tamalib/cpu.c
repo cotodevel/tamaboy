@@ -133,7 +133,10 @@ static u8_t sp;
 /* Flags */
 static u4_t flags;
 
-static u4_t memory[MEMORY_SIZE];
+#ifdef ARM9
+__attribute__((section(".dtcm")))
+#endif
+u4_t tama_io_memory[MEMORY_SIZE];
 
 static input_port_t inputs[INPUT_PORT_NUM] = {{0}};
 
@@ -183,7 +186,7 @@ static state_t cpu_state = {
 
 	.interrupts = interrupts,
 
-	.memory = memory,
+	.memory = tama_io_memory,
 };
 
 
@@ -363,15 +366,15 @@ static u4_t get_io(u12_t n)
 
 		case REG_K40_K43_BZ_OUTPUT_PORT:
 			/* Output port (R40-R43) */
-			return memory[n];
+			return tama_io_memory[n];
 
 		case REG_CPU_OSC3_CTRL:
 			/* CPU/OSC3 clocks switch, CPU voltage switch */
-			return memory[n];
+			return tama_io_memory[n];
 
 		case REG_LCD_CTRL:
 			/* LCD control */
-			return memory[n];
+			return tama_io_memory[n];
 
 		case REG_LCD_CONTRAST:
 			/* LCD contrast */
@@ -379,15 +382,15 @@ static u4_t get_io(u12_t n)
 
 		case REG_SVD_CTRL:
 			/* SVD */
-			return memory[n] & 0x7; // Voltage always OK
+			return tama_io_memory[n] & 0x7; // Voltage always OK
 
 		case REG_BUZZER_CTRL1:
 			/* Buzzer config 1 */
-			return memory[n];
+			return tama_io_memory[n];
 
 		case REG_BUZZER_CTRL2:
 			/* Buzzer config 2 */
-			return memory[n] & 0x3; // Buzzer ready
+			return tama_io_memory[n] & 0x3; // Buzzer ready
 
 		case REG_CLK_WD_TIMER_CTRL:
 			/* Clock/Watchdog timer reset */
@@ -554,15 +557,15 @@ static u4_t get_memory(u12_t n)
 	if (n < MEM_RAM_SIZE) {
 		/* RAM */
 		//g_hal->log(LOG_MEMORY, "RAM              - ");
-		res = memory[n];
+		res = tama_io_memory[n];
 	} else if (n >= MEM_DISPLAY1_ADDR && n < (MEM_DISPLAY1_ADDR + MEM_DISPLAY1_SIZE)) {
 		/* Display Memory 1 */
 		//g_hal->log(LOG_MEMORY, "Display Memory 1 - ");
-		res = memory[n];
+		res = tama_io_memory[n];
 	} else if (n >= MEM_DISPLAY2_ADDR && n < (MEM_DISPLAY2_ADDR + MEM_DISPLAY2_SIZE)) {
 		/* Display Memory 2 */
 		//g_hal->log(LOG_MEMORY, "Display Memory 2 - ");
-		res = memory[n];
+		res = tama_io_memory[n];
 	} else if (n >= MEM_IO_ADDR && n < (MEM_IO_ADDR + MEM_IO_SIZE)) {
 		/* I/O Memory */
 		//g_hal->log(LOG_MEMORY, "I/O              - ");
@@ -599,7 +602,7 @@ static void set_memory(u12_t n, u4_t v)
 	}
 
 	/* Cache any data written to a valid address */
-	memory[n] = v;
+	tama_io_memory[n] = v;
 
 	//g_hal->log(LOG_MEMORY, "Write 0x%X - Address 0x%03X - PC = 0x%04X\n", v, n, pc);
 }
@@ -621,7 +624,7 @@ void cpu_refresh_hw(void)
 	for (i = 0; refresh_locs[i].size != 0; i++) {
 		u12_t n = 0;
 		for (n = refresh_locs[i].addr; n < (refresh_locs[i].addr + refresh_locs[i].size); n++) {
-			set_memory(n, memory[n]);
+			set_memory(n, tama_io_memory[n]);
 		}
 	}
 }
@@ -1675,11 +1678,11 @@ void cpu_reset(void)
 
 	/* Init RAM to zeros */
 	for (i = 0; i < MEMORY_SIZE; i++) {
-		memory[i] = 0;
+		tama_io_memory[i] = 0;
 	}
 
-	memory[REG_K40_K43_BZ_OUTPUT_PORT] = 0xF; // Output port (R40-R43)
-	memory[REG_LCD_CTRL] = 0x8; // LCD control
+	tama_io_memory[REG_K40_K43_BZ_OUTPUT_PORT] = 0xF; // Output port (R40-R43)
+	tama_io_memory[REG_LCD_CTRL] = 0x8; // LCD control
 	/* TODO: Input relation register */
 
 	cpu_sync_ref_timestamp();
