@@ -102,9 +102,14 @@ __attribute__((optimize("O0")))
 __attribute__ ((optnone))
 #endif
 void VcounterUser(){
-	struct sIPCSharedTGDS * sIPCSharedTGDSInst = (struct sIPCSharedTGDS *)0x027FF000;
+	struct sIPCSharedTGDS * sIPCSharedTGDSInst = (struct sIPCSharedTGDS *)TGDSIPCStartAddress;
 	//Handle Clock (should this one run on IRQs instead?)
 	sIPCSharedTGDSInst->ndsRTCSeconds = nds_get_time7();
+	unsigned char hh = ((unsigned char)sIPCSharedTGDSInst->tmInst.tm_hour);
+    unsigned char mm = ((unsigned char)sIPCSharedTGDSInst->tmInst.tm_min);
+    unsigned char ss = ((unsigned char)sIPCSharedTGDSInst->tmInst.tm_sec);
+    struct sIPCSharedTGDSSpecific* sIPCSharedTGDSSpecificInst = getsIPCSharedTGDSSpecific();
+	convertHHMMSSDateTimeToTamaFormat(hh, mm, ss, (unsigned char *)&sIPCSharedTGDSSpecificInst->tama_clock_io_arm7[0]);
 }
 
 //Note: this event is hardware triggered from ARM7, on ARM9 a signal is raised through the FIFO hardware

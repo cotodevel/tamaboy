@@ -32,6 +32,8 @@ extern "C" {
 #endif
 
 extern int main(int argc, char **argv);
+extern bool convertHHMMSSDateTimeToTamaFormat(unsigned char hh, unsigned char mm, unsigned char ss, unsigned char * tama_io_memorySource);
+extern void int2bcd(int i, char *bcd);
 
 #ifdef __cplusplus
 }

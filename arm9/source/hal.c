@@ -7,6 +7,7 @@
 #include "tama_process.h"
 #include "clockTGDS.h"
 #include "ipcfifoTGDS.h"
+#include "ipcfifoTGDSUser.h"
 
 bool_t matrix_buffer[LCD_HEIGHT][LCD_WIDTH] = {{0}};
 bool_t icon_buffer[ICON_NUM] = {0};
@@ -105,11 +106,8 @@ __attribute__((section(".itcm")))
 timestamp_t hal_get_timestamp(void)
 {
 	//Sync to NDS RTC
-	struct sIPCSharedTGDS * TGDSIPC = TGDSIPCStartAddress;	
-	unsigned char hh = ((unsigned char)TGDSIPC->tmInst.tm_hour);
-    unsigned char mm = ((unsigned char)TGDSIPC->tmInst.tm_min);
-    unsigned char ss = ((unsigned char)TGDSIPC->tmInst.tm_sec);
-    convertHHMMSSDateTimeToTamaFormat(hh, mm, ss, (unsigned char *)&tama_io_memory[16]);
+	struct sIPCSharedTGDSSpecific* sIPCSharedTGDSSpecificInst = getsIPCSharedTGDSSpecific();
+	memcpy((unsigned char *)&tama_io_memory[16], (unsigned char *)&sIPCSharedTGDSSpecificInst->tama_clock_io_arm7[0], (int)6);	
 	return (timestamp_t)0;
 }
 
