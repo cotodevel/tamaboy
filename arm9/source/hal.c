@@ -105,9 +105,7 @@ __attribute__((section(".itcm")))
 #endif
 timestamp_t hal_get_timestamp(void)
 {
-	//Sync to NDS RTC
-	struct sIPCSharedTGDSSpecific* sIPCSharedTGDSSpecificInst = getsIPCSharedTGDSSpecific();
-	memcpy((unsigned char *)&tama_io_memory[16], (unsigned char *)&sIPCSharedTGDSSpecificInst->tama_clock_io_arm7[0], (int)6);	
+	//seconds occur since last NDS RTC time. Required for clock events
 	return (timestamp_t)0;
 }
 

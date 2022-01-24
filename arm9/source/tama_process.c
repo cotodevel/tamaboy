@@ -104,6 +104,9 @@ uint8 SetPix(uint8 X, uint8 Y, bool isSelectedIcon){
 	if(reEnableVblank == false){ //Startup code
 		enableWaitForVblankC();
 		playTamaIntro();
+		//Sync to NDS RTC
+		struct sIPCSharedTGDSSpecific* sIPCSharedTGDSSpecificInst = getsIPCSharedTGDSSpecific();
+		memcpy((unsigned char *)&tama_io_memory[16], (unsigned char *)&sIPCSharedTGDSSpecificInst->tama_clock_io_arm7[0], (int)6);	
 		reEnableVblank = true;
 	}
 	
