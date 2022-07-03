@@ -131,12 +131,12 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
 	delete gfx;
 
 	// Create screens
-	uiScreen = new AmigaScreen(TGDSPROJECTNAME, Gadget::GADGET_DRAGGABLE, AmigaScreen::AMIGA_SCREEN_SHOW_DEPTH);
+	uiScreen = new AmigaScreen(TGDSPROJECTNAME, Gadget::GADGET_DECORATION, AmigaScreen::AMIGA_SCREEN_SHOW_DEPTH);
 	woopsiApplication->addGadget(uiScreen);
 	uiScreen->setPermeable(true);
 
 	// Add child windows
-	AmigaWindow* controlWindow = new AmigaWindow(0, 13, 256, 33, "Controls", Gadget::GADGET_DRAGGABLE, AmigaWindow::AMIGA_WINDOW_SHOW_DEPTH);
+	AmigaWindow* controlWindow = new AmigaWindow(0, 13, 256, 33, "Controls", Gadget::GADGET_DECORATION, AmigaWindow::AMIGA_WINDOW_SHOW_DEPTH);
 	uiScreen->addGadget(controlWindow);
 
 	// Controls

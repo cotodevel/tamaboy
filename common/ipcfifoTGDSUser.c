@@ -31,6 +31,7 @@ USA
 #include "dsregs_asm.h"
 #include "InterruptsARMCores_h.h"
 #include "libutilsShared.h"
+#include "microphoneShared.h"
 
 #ifdef ARM7
 #include <string.h>
@@ -46,6 +47,7 @@ USA
 #include <stdbool.h>
 #include "main.h"
 #include "wifi_arm9.h"
+#include "dswnifi_lib.h"
 #include "cpu.h"
 #include "tama_process.h"
 
@@ -116,10 +118,10 @@ void setupLibUtils(){
 	initializeLibUtils9(
 		(HandleFifoNotEmptyWeakRefLibUtils_fn)&libUtilsFIFONotEmpty, //ARM7 & ARM9
 		(timerWifiInterruptARM9LibUtils_fn)&Timer_50ms, //ARM9 
-		(SoundSampleContextEnableARM7LibUtils_fn)&EnableSoundSampleContext, // ARM7 & ARM9: void EnableSoundSampleContext(int SndSamplemode)
-		(SoundSampleContextDisableARM7LibUtils_fn)&DisableSoundSampleContext,	//ARM7 & ARM9: void DisableSoundSampleContext()
 		(SoundStreamStopSoundStreamARM9LibUtils_fn)&stopSoundStream,	//ARM9: bool stopSoundStream(struct fd * tgdsStructFD1, struct fd * tgdsStructFD2, int * internalCodecType)
-		(SoundStreamUpdateSoundStreamARM9LibUtils_fn)&updateStream //ARM9: void updateStream() 
+		(SoundStreamUpdateSoundStreamARM9LibUtils_fn)&updateStream, //ARM9: void updateStream() 
+		(wifiDeinitARM7ARM9LibUtils_fn)&DeInitWIFI, //ARM7 & ARM9: DeInitWIFI()
+		(wifiswitchDsWnifiModeARM9LibUtils_fn)&switch_dswnifi_mode //ARM9: bool switch_dswnifi_mode(sint32 mode)
 	);
 	#endif
 	
@@ -132,10 +134,9 @@ void setupLibUtils(){
 		(SoundStreamTimerHandlerARM7LibUtils_fn)&TIMER1Handler, //ARM7: void TIMER1Handler()
 		(SoundStreamStopSoundARM7LibUtils_fn)&stopSound, 	//ARM7: void stopSound()
 		(SoundStreamSetupSoundARM7LibUtils_fn)&setupSound,	//ARM7: void setupSound()
-		(SoundSampleContextInitARM7LibUtils_fn)&initSoundSampleContext, //ARM7: initSoundSampleContext()
-		(SoundSampleContextEnableARM7LibUtils_fn)&EnableSoundSampleContext, // ARM7 & ARM9: void EnableSoundSampleContext(int SndSamplemode)
-		(SoundSampleContextDisableARM7LibUtils_fn)&DisableSoundSampleContext,	//ARM7 & ARM9: void DisableSoundSampleContext()
-		(initMallocARM7LibUtils_fn)&initARM7Malloc //ARM7: void initARM7Malloc(u32 ARM7MallocStartaddress, u32 ARM7MallocSize);
+		(initMallocARM7LibUtils_fn)&initARM7Malloc, //ARM7: void initARM7Malloc(u32 ARM7MallocStartaddress, u32 ARM7MallocSize);
+		(wifiDeinitARM7ARM9LibUtils_fn)&DeInitWIFI,  //ARM7 & ARM9: DeInitWIFI()
+		(MicInterruptARM7LibUtils_fn)&micInterrupt //ARM7: micInterrupt()
 	);
 	#endif
 }
