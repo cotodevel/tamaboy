@@ -1,72 +1,129 @@
-Note: These sources were based originally from (https://github.com/jeffayle/tamaboy)
+# TamaTool - A cross-platform Tamagotchi P1 explorer
 
-![tamaboy](img/tamaboy_nds.png)
 
-NTR/TWL SDK: TGDS1.65
+## Synopsis
 
-tamaboy is a [Tamagotchi v1](http://adb.arcadeitalia.net/?mame=tama) emulator
-for Nintendo DS / DSi / 3DS based on [TamaLIB](https://github.com/jcrona/tamalib/).
+TamaTool is a cross-platform Tamagotchi P1 explorer relying on the hardware agnostic Tamagotchi P1 emulation library [TamaLIB](https://github.com/jcrona/tamalib/), and mainly targeting Linux, Windows and MacOS.
+
+More than a simple emulator, it is an exploration tool featuring a realtime RAM editor, an ASM debugger, an I/Os monitor and a sprite manipulator, allowing to play around with the Tamagotchi P1 ROM. It also allows to save and restore its emulation state, thus allowing you to backup and share your best friend !
+
+![TamaTool](misc/screenshot.png)![TamaTool-Shell](misc/screenshot2.png)
+
+In order to create the background image used in TamaTool, I scanned the background of my own P1, that I filtered/enhanced using GIMP. The original scan be found in the __misc__ folder. The shell is also a photo of my P1.
+
+__Notes regarding the supported platforms__
+
+The Windows build does not include the realtime memory editor. The ASM debugger and I/Os monitor do work, but the emulation is very slow when they are enabled because of the poor console performances.
+Android support would be feasible, but a native implementation of TamaLIB without libSDL2 would probably be more efficient.
+
+## Build instruction
+
+First, you need to clone TamaTool and its submodule:
+```
+$ git clone --recursive https://github.com/jcrona/tamatool.git
+```
+
+Then the instructions depend on the targetted platform.
+
+### Linux (or other Unix environments providing the dependencies as system libraries)
+
+TamaTool depends on libSDL2, libSDL2-image and libpng.
+On Ubuntu, you can install those libraries using the following command:
+```
+$ sudo apt-get install libsdl2-dev libsdl2-image-dev libpng-dev
+```
+
+Then you can build a distribution package (no library bundled) with:
+```
+$ make linux
+```
+
+The package will be available in the __linux__ folder.
+
+### Windows
+
+Only cross-compiling from linux using MinGW64 is supported. The required dependencies are provided as prebuilt binaries.
+On Ubuntu you can install MinGW64 using the following command:
+```
+$ sudo apt install gcc-mingw-w64
+```
+
+Then you can build a distribution package (with the required libraries bundled) with:
+```
+$ make windows
+```
+
+The package will be available in the __windows__ folder.
+
+### MacOS
+
+TamaTool needs to be built on MacOS. The required dependencies are provided as prebuilt binaries.
+You can build a distribution package (with the required libraries bundled) with:
+```
+$ make mac
+```
+
+The package will be available in the __mac__ folder.
+
 
 ## Usage
 
-NTR mode: copy arm7dldi-ntr/ndstamaboy.nds and release/drumSample.ima to SD root/base path.
-TWL mode: copy arm7dldi-twl/ndstamaboy.srl and release/drumSample.ima to SD root/base path.
+TamaTool being an emulator, it requires a compatible Tamagotchi P1 ROM called __rom.bin__ in its folder. This ROM is not provided here, but you can get it [there](https://www.planetemu.net/rom/mame-roms/tama) for instance.
+For your information, the expected ROM format is 16 bits in big-endian per instruction (the actual E0C6S46 instructions are 12-bit long).
 
-The Tamagotchi's Left, Middle and Right buttons are mapped respectively to the
-d-pad Left, UpDown and Right. Or use the touchscreen controls
+Hatching a new Tamagotchi:
+```
+$ ./tamatool
+```
 
-The same buttons are also mapped to Select, A and B respectively. This mapping
-is intended to be as intuitive as possible to navigate the device's menus.
+Starting the memory editor:
+```
+$ ./tamatool -e
+```
 
-NB: Make sure to set the clock or your egg will never hatch. There should be
-animated arrows on the clock screen.
+Looking at the CPU instructions in realtime:
+```
+$ ./tamatool -c
+```
 
-!!!!NOTE!!!!
-Saving: Press the Save & Exit button. If you're using hardware, it should turn off automatically. Still, you should be greeted by a message confirming to shut off the NintendoDS.
-Reading Save: Loading saved tamagotchi happens automatically on boot. Sometimes it can take up to 10~ minutes or even more, please wait... it WILL load! A drumming intro will play when the pet has loaded.
-!!!!!!!!!!!!
+Extracting the data from the ROM to a PNG file:
+```
+$ ./tamatool -E data.png
+```
 
-RTC: Implemented correctly. Reads from internal NDS RTC clock in real time!
+Importing back the data into the ROM:
+```
+$ ./tamatool -M data.png
+```
 
-## Compile Time Dependencies
+When playing around with the extracted data, you can safely modify the sprites. However, modifying other data will likely result in a broken ROM.
 
-- TGDS (https://bitbucket.org/Coto88/toolchaingenericds/src)
+Getting all the supported options:
+```
+$ ./tamatool -h
+```
 
-## How to Compile
-
-Since this is a TGDS project, you can follow the same steps, as, for example, https://bitbucket.org/Coto88/toolchaingenericds-template/
-
-## 
-Drums intro thanks to Thomas Drachmann - A Short Drum Solo
-
-____Remoteboot____
-Also, it's recommended to use the remoteboot feature. It allows to send the current TGDS Project over wifi removing the necessity
-to take out the SD card repeteadly and thus, causing it to wear out and to break the SD slot of your unit.
-
-Usage:
-- Make sure the wifi settings in the NintendoDS are properly set up, so you're already able to connect to internet from it.
-
-- Get a copy of ToolchainGenericDS-multiboot: https://bitbucket.org/Coto88/ToolchainGenericDS-multiboot/get/TGDS1.65.zip
-Follow the instructions there and get either the TWL or NTR version. Make sure you update the computer IP address used to build TGDS Projects, 
-in the file: toolchaingenericds-multiboot-config.txt of said repository before moving it into SD card.
-
-For example if you're running NTR mode (say, a DS Lite), you'll need ToolchainGenericDS-multiboot.nds, tgds_multiboot_payload_ntr.bin
-and toolchaingenericds-multiboot-config.txt (update here, the computer's IP you use to build TGDS Projects) then move all of them to root SD card directory.
-
-- Build the TGDS Project as you'd normally would, and run these commands from the shell.
-<make clean>
-<make>
-
-- Then if you're on NTR mode:
-<remoteboot ntr_mode computer_ip_address>
-
-- Or if you're on TWL mode:
-<remoteboot twl_mode computer_ip_address>
-
-- And finally boot ToolchainGenericDS-multiboot, and press (X), wait a few seconds and TGDS Project should boot remotely.
-  After that, everytime you want to remoteboot a TGDS Project, repeat the last 2 steps. ;-)
+Once running, you can either click on the shell buttons to interact with the Tamagotchi, or you can press the __left__, __down__ and __right__ arrow keys of your keyboard.  
+Pressing __s__ puts the emulation in step by step mode and executes the next instruction, while __r__ resumes it.  
+Pressing __w__ fully executes the next instruction or call (no step by step inside a call).  
+Pressing __x__ stops the execution right after the next call.  
+Pressing __c__ stops the execution right after the next return.  
+Pressing __f__ toggles between the original speed, x10 speed and unlimited speed.  
+Pressing __t__ shows/hides the shell of the Tamagotchi.  
+Pressing __i__ increases the size of the GUI, while __d__ decreases it.  
+Pressing __b__ saves the emulation state to a __saveN.bin__ file, while __n__ loads the last saved state.
 
 
+## License
+
+TamaTool is distributed under the GPLv2 license. See the LICENSE file for more information.
 
 
-Coto
+## Hardware information
+
+The Tamagotchi P1 is based on an E0C6S46 Epson MCU, and runs at 32,768 kHz. Its LCD is 32x16 B/W pixels, with 8 icons.
+To my knowledge, the ROM available online has been extracted from a high-res picture of a die. The ROM mask was clear enough to be optically read. The pictures can be seen [there](https://siliconpr0n.org/map/bandai/tamagotchi-v1/) (thx asterick for the link !).  
+I would love to see the same work done on a P2 and add support for it in TamaLIB/TamaTool !
+
+__  
+Copyright (C) 2021 Jean-Christophe Rona
