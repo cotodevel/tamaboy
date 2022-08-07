@@ -20,6 +20,7 @@
 #include "bmp.h"
 #include "winDir.h"
 #include "png.h"
+#include "SDL.h"
 using namespace std;
 
 /*
@@ -711,7 +712,8 @@ png_bytepp read_png_file(const char* file_name, int* rst_rowbytes, int* rst_widt
 }
 
 
-/* Program entry point */
+/* Program entry point, it'll be replaced later by tamatool's main entrypoint */
+
 int main(int argc, char* argv[]) {
 
 	printf("debug!");		
