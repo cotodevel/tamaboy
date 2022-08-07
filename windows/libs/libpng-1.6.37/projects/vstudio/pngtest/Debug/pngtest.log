@@ -1,0 +1,51 @@
+﻿Build started 06/08/2022 22:33:32.
+     1>Project "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\pngtest\pngtest.vcxproj" on node 3 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I..\zlib /I..\..\..\scripts /Zi /nologo /Wall /WX /Od /Oi /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy- /fp:precise /fp:except- /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /FR"Debug\\" /Gd /TC /wd4255 /wd4668 /wd4710 /wd4711 /wd4746 /wd4820 /wd4996 /analyze- /errorReport:prompt ..\..\..\pngtest.c
+         pngtest.c
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngtest.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\\" libpng16.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngtest.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngtest.lib" /MACHINE:X86 /SAFESEH Debug\pngtest.obj
+         pngtest.vcxproj -> C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngtest.exe
+       BscMake:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\bscmake.exe /nologo /o"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngtest.bsc" Debug\pngtest.sbr
+       CustomBuildStep:
+         "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngtest.exe" ..\..\..\pngtest.png "Debug\pngout.png"
+         :VCEnd
+         
+          Testing libpng version 1.6.37
+            with zlib   version 1.2.3
+         
+         libpng version 1.6.37
+         Copyright (c) 2018-2019 Cosmin Truta
+         Copyright (c) 1998-2002,2004,2006-2018 Glenn Randers-Pehrson
+         Copyright (c) 1996-1997 Andreas Dilger
+         Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
+          library (10637): libpng version 1.6.37 - April 14, 2019
+          pngtest (10637): libpng version 1.6.37 - April 14, 2019
+         
+          Testing ..\..\..\pngtest.png: eXIf type MM, 52 bytes
+         
+          Pass 0: rwrwrwrwrwrwrwrwrw
+          Pass 1: rwrwrwrwrwrwrwrwrw
+          Pass 2: rwrwrwrwrwrwrwrw
+          Pass 3: rwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrw
+          Pass 4: rwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrw
+          Pass 5: rwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrw
+                  rwrwrwrw
+          Pass 6: rwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrwrw
+                  rwrwrwrwrw eXIf type MM, 52 bytes
+          eXIf type MM, 52 bytes
+         
+          PASS (9782 zero samples)
+          tIME = 7 Jun 1996 17:58:08 +0000
+          libpng passes test
+          Default limits:
+           width_max  = 1000000
+           height_max = 1000000
+           cache_max  = 1000
+           malloc_max = 8000000
+     1>Done Building Project "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\pngtest\pngtest.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.80

@@ -1,0 +1,36 @@
+﻿Build started 06/08/2022 22:33:23.
+     1>Project "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\zlib\zlib.vcxproj" on node 2 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /Wall /WX /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D Z_SOLO /Gm- /EHsc /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /FR"Debug\\" /Gd /TC /wd4255 /wd4668 /wd4710 /wd4711 /wd4746 /wd4820 /wd4996 /wd4127 /wd4131 /wd4242 /wd4244 /analyze- /errorReport:prompt ..\zlib\adler32.c ..\zlib\compress.c ..\zlib\crc32.c ..\zlib\deflate.c ..\zlib\infback.c ..\zlib\inffast.c ..\zlib\inflate.c ..\zlib\inftrees.c ..\zlib\trees.c ..\zlib\uncompr.c ..\zlib\zutil.c
+         adler32.c
+         compress.c
+         crc32.c
+         deflate.c
+         infback.c
+         inffast.c
+         inflate.c
+         inftrees.c
+         trees.c
+         uncompr.c
+         zutil.c
+         Generating Code...
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\Lib.exe /OUT:"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\zlib.lib" /NOLOGO Debug\adler32.obj
+         Debug\compress.obj
+         Debug\crc32.obj
+         Debug\deflate.obj
+         Debug\infback.obj
+         Debug\inffast.obj
+         Debug\inflate.obj
+         Debug\inftrees.obj
+         Debug\trees.obj
+         Debug\uncompr.obj
+         Debug\zutil.obj
+         zlib.vcxproj -> C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\zlib.lib
+       BscMake:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\bscmake.exe /nologo /o"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\zlib.bsc" Debug\adler32.sbr Debug\compress.sbr Debug\crc32.sbr Debug\deflate.sbr Debug\infback.sbr Debug\inffast.sbr Debug\inflate.sbr Debug\inftrees.sbr Debug\trees.sbr Debug\uncompr.sbr Debug\zutil.sbr
+     1>Done Building Project "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\zlib\zlib.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:01.58
