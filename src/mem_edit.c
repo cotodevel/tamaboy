@@ -17,47 +17,52 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#if !defined(__WIN32__)
+#if !defined(WIN32)
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/select.h>
-#include <termios.h>
+//#include <unistd.h>
+//#include <sys/select.h>
+//#include <termios.h>
 
 #include "lib/tamalib.h"
 
 #include "mem_edit.h"
 
 static u13_t editor_cursor = 0x0;
-static struct termios orig_termios;
+//static struct termios orig_termios;
 
 
 void mem_edit_reset_terminal(void)
 {
+	/*
 	tcsetattr(0, TCSANOW, &orig_termios);
 
-	/* Clear the console */
+	// Clear the console 
 	printf("\e[1;1H\e[2J");
+	*/
 }
 
 void mem_edit_configure_terminal(void)
 {
+	/*
 	struct termios new_termios;
 
-	/* Backup the terminal configuration */
+	// Backup the terminal configuration 
 	tcgetattr(0, &orig_termios);
 	memcpy(&new_termios, &orig_termios, sizeof(new_termios));
 
-	/* Register cleanup handler, and set the new terminal mode */
+	// Register cleanup handler, and set the new terminal mode 
 	atexit(mem_edit_reset_terminal);
 	cfmakeraw(&new_termios);
 	tcsetattr(0, TCSANOW, &new_termios);
+	*/
 }
 
 static int kbhit()
 {
+	/*
 	struct timeval tv = { 0L, 0L };
 
 	fd_set fds;
@@ -65,10 +70,13 @@ static int kbhit()
 	FD_SET(0, &fds);
 
 	return select(1, &fds, NULL, NULL, &tv);
+	*/
+	return -1;
 }
 
 static int getch()
 {
+	/*
 	int r;
 	unsigned char c;
 
@@ -77,10 +85,13 @@ static int getch()
 	} else {
 		return c;
 	}
+	*/
+	return -1;
 }
 
 static void print_editor_field(char *name, u32_t val, uint8_t depth, u12_t position)
 {
+	/*
 	u12_t i;
 
 	printf("\e[1;34m%s:\e[0m 0x", name);
@@ -95,19 +106,21 @@ static void print_editor_field(char *name, u32_t val, uint8_t depth, u12_t posit
 			printf("\e[0m");
 		}
 	}
+	*/
 }
 
 void mem_edit_update(void)
 {
+	/*
 	u12_t i;
 	uint8_t key;
 	state_t *state = tamalib_get_state();
 	int8_t hbyte = -1;
 
-	/* Clear the console */
+	// Clear the console 
 	printf("\e[1;1H\e[2J");
 
-	/* Memory */
+	// Memory 
 	for (i = 0; i < MEMORY_SIZE; i++) {
 		if (!(i % 0x80)) {
 			printf("\r\n\e[1;34m0x%03X:\e[0m ", i);
@@ -116,15 +129,15 @@ void mem_edit_update(void)
 		if (i == editor_cursor) {
 			printf("\e[0;30;42m");
 		} else if (i < 0x280) {
-			/* RAM */
+			// RAM 
 		} else if (i >= 0xE00 && i < 0xE50) {
-			/* Display Memory 1 */
+			// Display Memory 1 
 			printf("\e[0;35m");
 		} else if (i >= 0xE80 && i < 0xED0) {
-			/* Display Memory 2 */
+			// Display Memory 2 
 			printf("\e[0;36m");
 		} else if (i >= 0xF00 && i < 0xF80) {
-			/* I/O Memory */
+			// I/O Memory 
 			printf("\e[0;33m");
 		} else {
 			printf("\e[0;90m");
@@ -140,7 +153,7 @@ void mem_edit_update(void)
 	printf("\r\n");
 	printf("\r\n");
 
-	/* Variables */
+	// Variables 
 	print_editor_field("PC", *(state->pc), 4, 0);
 	printf("    ");
 	print_editor_field("SP", *(state->sp), 2, 4);
@@ -160,7 +173,7 @@ void mem_edit_update(void)
 
 	printf("\r\n");
 
-	/* Cursor position */
+	// Cursor position 
 	if (editor_cursor < MEMORY_SIZE) {
 		printf("\e[1;32mCursor:\e[0m 0x%04X", editor_cursor);
 	} else {
@@ -172,7 +185,7 @@ void mem_edit_update(void)
 	while (kbhit()) {
 		key = getch();
 		switch (key) {
-			/* Arrows */
+			// Arrows 
 			case 65:
 				if ((editor_cursor >> 7) == 0x20) {
 					editor_cursor = MEMORY_SIZE - 0x80;
@@ -205,7 +218,7 @@ void mem_edit_update(void)
 				}
 				break;
 
-			/* Numbers */
+			// Numbers 
 			case 48:
 			case 49:
 			case 50:
@@ -219,7 +232,7 @@ void mem_edit_update(void)
 				hbyte = key - 48;
 				break;
 
-			/* Lowercase letters */
+			// Lowercase letters 
 			case 97:
 			case 98:
 			case 99:
@@ -232,10 +245,10 @@ void mem_edit_update(void)
 
 		if (hbyte >= 0) {
 			if (editor_cursor < MEMORY_SIZE) {
-				/* Memory */
+				// Memory 
 				SET_MEMORY(state->memory, editor_cursor, hbyte);
 			} else {
-				/* Variables */
+				// Variables 
 				if ((editor_cursor & 0xFFF) < 4) {
 					*(state->pc) = (*(state->pc) & ~(0xF << (4 * (3 - editor_cursor)))) | (hbyte << (4 * (3 - editor_cursor)));
 				} else if ((editor_cursor & 0xFFF) < 6) {
@@ -259,6 +272,7 @@ void mem_edit_update(void)
 			hbyte = -1;
 		}
 	}
+	*/
 }
 #else
 void mem_edit_reset_terminal(void) {}

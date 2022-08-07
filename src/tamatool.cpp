@@ -22,15 +22,18 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
-#include <getopt.h>
-#if !defined(__WIN32__)
+#if defined(WIN32)
 #include <time.h>
 #endif
 
-#if defined(__WIN32__)
 #include <windows.h>
+#include <profileapi.h>
+
+#if defined(WIN32)
+
 #elif defined(__APPLE__)
 #include <CoreFoundation/CoreFoundation.h>
+#include <getopt.h>
 #endif
 
 #include "SDL.h"

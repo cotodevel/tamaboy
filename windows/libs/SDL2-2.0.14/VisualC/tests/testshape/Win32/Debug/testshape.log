@@ -1,4 +1,4 @@
-﻿Build started 06/08/2022 23:59:29.
+﻿Build started 07/08/2022 0:58:10.
      1>Project "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\tests\testshape\testshape.vcxproj" on node 3 (Rebuild target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\/../include" /Z7 /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0700 /Gm- /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Win32\Debug\\" /Fd"Win32\Debug\vc110.pdb" /Gd /TC /analyze- /errorReport:prompt ..\..\..\test\testshape.c
@@ -12,4 +12,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.36
+Time Elapsed 00:00:01.48

@@ -1,4 +1,4 @@
-﻿Build started 07/08/2022 0:27:45.
+﻿Build started 07/08/2022 0:59:30.
      1>Project "C:\bitbucket_clone\tamaboy\windows\libs\SDL2_image-2.0.5\VisualC\SDL_image.vcxproj" on node 2 (Rebuild target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Iexternal\include /Z7 /nologo /W3 /WX- /Od /Oy- /D DLL_EXPORT /D _DEBUG /D WIN32 /D _WINDOWS /D USE_STBIMAGE /D LOAD_BMP /D LOAD_GIF /D LOAD_JPG /D LOAD_LBM /D LOAD_PCX /D LOAD_PNG /D LOAD_PNM /D LOAD_QOI /D LOAD_SVG /D LOAD_TGA /D LOAD_TIF /D "LOAD_TIF_DYNAMIC=\"libtiff-5.dll\"" /D LOAD_WEBP /D "LOAD_WEBP_DYNAMIC=\"libwebp-7.dll\"" /D LOAD_XCF /D LOAD_XPM /D LOAD_XV /D _VC80_UPGRADE=0x0600 /D _WINDLL /Gm- /EHsc /MD /GS /arch:SSE /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Win32\Debug\\" /Fd"Win32\Debug\vc110.pdb" /Gd /TC /analyze- /errorReport:prompt ..\IMG.c ..\IMG_avif.c ..\IMG_bmp.c ..\IMG_gif.c ..\IMG_jpg.c ..\IMG_jxl.c ..\IMG_lbm.c ..\IMG_pcx.c ..\IMG_png.c ..\IMG_pnm.c ..\IMG_qoi.c ..\IMG_stb.c ..\IMG_svg.c ..\IMG_tga.c ..\IMG_tif.c ..\IMG_webp.c ..\IMG_WIC.c ..\IMG_xcf.c ..\IMG_xpm.c ..\IMG_xv.c ..\IMG_xxx.c
@@ -58,4 +58,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:05.10
+Time Elapsed 00:00:04.48

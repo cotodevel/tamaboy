@@ -1,3 +1,19 @@
+//disable _CRT_SECURE_NO_WARNINGS message to build this in VC++
+#pragma warning(disable:4996)
+
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+#if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__CYGWIN__)
+#  include <fcntl.h>
+#  include <io.h>
+#  define SET_BINARY_MODE(file) setmode(fileno(file), O_BINARY)
+#else
+#  define SET_BINARY_MODE(file)
+#endif
+
+#include <Windows.h>
+
 /*
  * TamaTool - A cross-platform Tamagotchi P1 explorer
  *
@@ -21,7 +37,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <getopt.h>
+//#include <getopt.h>
 #include <png.h>
 
 #include "SDL.h"

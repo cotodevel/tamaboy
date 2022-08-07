@@ -1,4 +1,4 @@
-﻿Build started 06/08/2022 22:33:32.
+﻿Build started 07/08/2022 0:54:56.
      1>Project "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\pngvalid\pngvalid.vcxproj" on node 2 (Rebuild target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I..\zlib /I..\..\..\scripts /Zi /nologo /Wall /WX /Od /Oi /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D PNG_USE_DLL /D _UNICODE /D UNICODE /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy- /fp:precise /fp:except- /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /FR"Debug\\" /Gd /TC /wd4255 /wd4668 /wd4710 /wd4711 /wd4746 /wd4820 /wd4996 /analyze- /errorReport:prompt ..\..\..\contrib\libtests\pngvalid.c
@@ -58,4 +58,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:01:17.70
+Time Elapsed 00:00:58.96

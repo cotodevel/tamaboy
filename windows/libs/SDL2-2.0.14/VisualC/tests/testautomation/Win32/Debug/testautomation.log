@@ -1,4 +1,4 @@
-﻿Build started 06/08/2022 23:59:11.
+﻿Build started 07/08/2022 0:57:53.
      1>Project "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\tests\testautomation\testautomation.vcxproj" on node 2 (Rebuild target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\/../include" /Z7 /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0700 /Gm- /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Win32\Debug\\" /Fd"Win32\Debug\vc110.pdb" /Gd /TC /analyze- /errorReport:prompt ..\..\..\Test\testautomation.c ..\..\..\test\testautomation_audio.c ..\..\..\test\testautomation_clipboard.c ..\..\..\test\testautomation_events.c ..\..\..\test\testautomation_hints.c ..\..\..\test\testautomation_keyboard.c ..\..\..\test\testautomation_main.c ..\..\..\test\testautomation_mouse.c ..\..\..\test\testautomation_pixels.c ..\..\..\test\testautomation_platform.c ..\..\..\test\testautomation_rect.c ..\..\..\test\testautomation_render.c ..\..\..\test\testautomation_rwops.c ..\..\..\test\testautomation_sdltest.c ..\..\..\test\testautomation_stdlib.c ..\..\..\test\testautomation_surface.c ..\..\..\test\testautomation_syswm.c ..\..\..\test\testautomation_timer.c ..\..\..\test\testautomation_video.c
@@ -50,4 +50,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:08.60
+Time Elapsed 00:00:07.92

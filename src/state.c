@@ -1,3 +1,6 @@
+//disable _CRT_SECURE_NO_WARNINGS message to build this in VC++
+#pragma warning(disable:4996)
+
 /*
  * TamaTool - A cross-platform Tamagotchi P1 explorer
  *

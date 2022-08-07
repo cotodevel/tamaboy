@@ -605,8 +605,9 @@ static void set_memory(u12_t n, u4_t v)
 	g_hal->log(LOG_MEMORY, "Write 0x%X - Address 0x%03X - PC = 0x%04X\n", v, n, pc);
 }
 
-void cpu_refresh_hw(void)
-{
+void cpu_refresh_hw(void){
+	int i = 0;
+	u12_t n = 0;
 	static const struct range {
 		u12_t addr;
 		u12_t size;
@@ -619,8 +620,8 @@ void cpu_refresh_hw(void)
 		{ 0, 0 }, // end of list
 	};
 
-	for (int i = 0; refresh_locs[i].size != 0; i++) {
-		for (u12_t n = refresh_locs[i].addr; n < (refresh_locs[i].addr + refresh_locs[i].size); n++) {
+	for (i = 0; refresh_locs[i].size != 0; i++) {
+		for (n = refresh_locs[i].addr; n < (refresh_locs[i].addr + refresh_locs[i].size); n++) {
 			set_memory(n, GET_MEMORY(memory, n));
 		}
 	}

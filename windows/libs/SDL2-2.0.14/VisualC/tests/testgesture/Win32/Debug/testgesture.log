@@ -1,5 +1,16 @@
-﻿Build started 06/08/2022 23:59:15.
+﻿Build started 07/08/2022 0:57:59.
+     1>Project "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\tests\testgesture\testgesture.vcxproj" on node 2 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\/../include" /Z7 /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0700 /Gm- /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Win32\Debug\\" /Fd"Win32\Debug\vc110.pdb" /Gd /TC /analyze- /errorReport:prompt ..\..\..\test\testgesture.c
+         testgesture.c
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\testgesture.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\testgesture.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\testgesture.lib" /MACHINE:X86 /SAFESEH Win32\Debug\testgesture.obj
+         "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\SDL2.lib"
+         "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\SDL2main.lib"
+         "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\SDL2test.lib"
+         testgesture.vcxproj -> C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\testgesture.exe
+     1>Done Building Project "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\tests\testgesture\testgesture.vcxproj" (Rebuild target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00
+Time Elapsed 00:00:03.16

@@ -1,4 +1,4 @@
-﻿Build started 06/08/2022 22:33:23.
+﻿Build started 07/08/2022 0:54:47.
      1>Project "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\zlib\zlib.vcxproj" on node 2 (Rebuild target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /Wall /WX /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D Z_SOLO /Gm- /EHsc /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /FR"Debug\\" /Gd /TC /wd4255 /wd4668 /wd4710 /wd4711 /wd4746 /wd4820 /wd4996 /wd4127 /wd4131 /wd4242 /wd4244 /analyze- /errorReport:prompt ..\zlib\adler32.c ..\zlib\compress.c ..\zlib\crc32.c ..\zlib\deflate.c ..\zlib\infback.c ..\zlib\inffast.c ..\zlib\inflate.c ..\zlib\inftrees.c ..\zlib\trees.c ..\zlib\uncompr.c ..\zlib\zutil.c
@@ -33,4 +33,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.58
+Time Elapsed 00:00:01.82

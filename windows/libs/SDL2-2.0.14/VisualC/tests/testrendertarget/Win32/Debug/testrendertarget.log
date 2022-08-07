@@ -1,4 +1,4 @@
-﻿Build started 06/08/2022 23:59:24.
+﻿Build started 07/08/2022 0:58:06.
      1>Project "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\tests\testrendertarget\testrendertarget.vcxproj" on node 2 (Rebuild target(s)).
      1>CustomBuild:
          Copying icon.bmp
@@ -18,4 +18,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.78
+Time Elapsed 00:00:02.37
