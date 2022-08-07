@@ -1,13 +1,13 @@
-﻿Build started 07/08/2022 0:01:14.
+﻿Build started 07/08/2022 0:34:28.
      1>Project "C:\bitbucket_clone\tamaboy\windows\tamaboy\tamaboy.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"..\libs\SDL2-2.0.14\include" /I"..\libs\libpng-1.6.37" /I"..\glewglut\glew-1.11.0\include" /I..\glewglut\freeglut\include /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt bmp.cpp main.cpp winDir.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"..\libs\SDL2_image-2.0.5" /I"..\libs\SDL2-2.0.14\include" /I"..\libs\libpng-1.6.37" /I"..\glewglut\glew-1.11.0\include" /I..\glewglut\freeglut\include /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt bmp.cpp main.cpp winDir.cpp
          winDir.cpp
          main.cpp
          bmp.cpp
          Generating Code...
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\bitbucket_clone\tamaboy\windows\Debug\tamaboy.exe" /INCREMENTAL /NOLOGO /LIBPATH:"..\libs\SDL2-2.0.14\VisualC\Win32\Debug" /LIBPATH:"..\libs\libpng-1.6.37\projects\vstudio\Debug" /LIBPATH:..\glewglut\freeglut\lib /LIBPATH:"..\glewglut\glew-1.11.0\lib" freeglut.lib glew32.lib libpng16.lib SDL2.lib SDL2main.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\bitbucket_clone\tamaboy\windows\Debug\tamaboy.pdb" /TLBID:1 /ENTRY:"main" /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\bitbucket_clone\tamaboy\windows\Debug\tamaboy.lib" /MACHINE:X86 Debug\bmp.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\bitbucket_clone\tamaboy\windows\Debug\tamaboy.exe" /INCREMENTAL /NOLOGO /LIBPATH:"..\libs\SDL2_image-2.0.5\VisualC\Win32\Debug" /LIBPATH:"..\libs\SDL2-2.0.14\VisualC\Win32\Debug" /LIBPATH:"..\libs\libpng-1.6.37\projects\vstudio\Debug" /LIBPATH:..\glewglut\freeglut\lib /LIBPATH:"..\glewglut\glew-1.11.0\lib" freeglut.lib glew32.lib libpng16.lib SDL2.lib SDL2main.lib SDL2_image.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\bitbucket_clone\tamaboy\windows\Debug\tamaboy.pdb" /TLBID:1 /ENTRY:"main" /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\bitbucket_clone\tamaboy\windows\Debug\tamaboy.lib" /MACHINE:X86 Debug\bmp.obj
          Debug\main.obj
          Debug\winDir.obj
      1>bmp.obj : warning LNK4210: .CRT section exists; there may be unhandled static initializers or terminators
@@ -19,4 +19,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:08.49
+Time Elapsed 00:00:06.82
