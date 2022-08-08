@@ -1,3 +1,6 @@
+//disable _CRT_SECURE_NO_WARNINGS message to build this in VC++
+#pragma warning(disable:4996)
+
 /*
  * TamaTool - A cross-platform Tamagotchi P1 explorer
  *
@@ -22,6 +25,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
+#include "..\windows\tamaboy\getopt.h"
 #if defined(WIN32)
 #include <time.h>
 #endif
@@ -158,27 +162,27 @@ static void sdl_release(void);
 static bool_t sdl_init(void);
 
 
-static void * hal_malloc(u32_t size)
+void * hal_malloc(u32_t size)
 {
 	return SDL_malloc(size);
 }
 
-static void hal_free(void *ptr)
+void hal_free(void *ptr)
 {
 	SDL_free(ptr);
 }
 
-static void hal_halt(void)
+void hal_halt(void)
 {
 	exit(EXIT_SUCCESS);
 }
 
-static bool_t hal_is_log_enabled(log_level_t level)
+bool_t hal_is_log_enabled(log_level_t level)
 {
 	return !!(log_levels & level);
 }
 
-static void hal_log(log_level_t level, char *buff, ...)
+void hal_log(log_level_t level, char *buff, ...)
 {
 	va_list arglist;
 
@@ -193,7 +197,7 @@ static void hal_log(log_level_t level, char *buff, ...)
 	va_end(arglist);
 }
 
-static timestamp_t hal_get_timestamp(void)
+timestamp_t hal_get_timestamp(void)
 {
 #if defined(__WIN32__)
 	LARGE_INTEGER count;
@@ -208,7 +212,7 @@ static timestamp_t hal_get_timestamp(void)
 #endif
 }
 
-static void hal_sleep_until(timestamp_t ts)
+void hal_sleep_until(timestamp_t ts)
 {
 #ifndef NO_SLEEP
 #if defined(__WIN32__)
@@ -233,7 +237,7 @@ static void hal_sleep_until(timestamp_t ts)
 #endif
 }
 
-static void hal_update_screen(void)
+void hal_update_screen(void)
 {
 	unsigned int i, j;
 	SDL_Rect r, src_icon_r, dest_icon_r;
@@ -286,17 +290,17 @@ static void hal_update_screen(void)
 	SDL_RenderPresent(renderer);
 }
 
-static void hal_set_lcd_matrix(u8_t x, u8_t y, bool_t val)
+void hal_set_lcd_matrix(u8_t x, u8_t y, bool_t val)
 {
 	matrix_buffer[y][x] = val;
 }
 
-static void hal_set_lcd_icon(u8_t icon, bool_t val)
+void hal_set_lcd_icon(u8_t icon, bool_t val)
 {
 	icon_buffer[icon] = val;
 }
 
-static void hal_set_frequency(u32_t freq)
+void hal_set_frequency(u32_t freq)
 {
 	if (current_freq != freq) {
 		current_freq = freq;
@@ -304,7 +308,7 @@ static void hal_set_frequency(u32_t freq)
 	}
 }
 
-static void hal_play_frequency(bool_t en)
+void hal_play_frequency(bool_t en)
 {
 	if (is_audio_playing != en) {
 		is_audio_playing = en;
@@ -539,7 +543,7 @@ static int handle_sdl_events(SDL_Event *event)
 	return 0;
 }
 
-static int hal_handler(void)
+int hal_handler(void)
 {
 	SDL_Event event;
 	timestamp_t ts;
@@ -562,21 +566,7 @@ static int hal_handler(void)
 	return 0;
 }
 
-static hal_t hal = {
-	.malloc = &hal_malloc,
-	.free = &hal_free,
-	.halt = &hal_halt,
-	.is_log_enabled = &hal_is_log_enabled,
-	.log = &hal_log,
-	.sleep_until = &hal_sleep_until,
-	.get_timestamp = &hal_get_timestamp,
-	.update_screen = &hal_update_screen,
-	.set_lcd_matrix = &hal_set_lcd_matrix,
-	.set_lcd_icon = &hal_set_lcd_icon,
-	.set_frequency = &hal_set_frequency,
-	.play_frequency = &hal_play_frequency,
-	.handler = &hal_handler,
-};
+hal_t hal;
 
 static void audio_callback(void *userdata, Uint8 *stream, int len)
 {

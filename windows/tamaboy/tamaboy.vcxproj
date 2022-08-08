@@ -53,7 +53,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\libs\SDL2_image-2.0.5\VisualC\Win32\Debug;..\libs\SDL2-2.0.14\VisualC\Win32\Debug;..\libs\libpng-1.6.37\projects\vstudio\Debug;..\glewglut\freeglut\lib;..\glewglut\glew-1.11.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;glew32.lib;libpng16.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;libpng16.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>main</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
@@ -84,6 +84,7 @@
     <ClCompile Include="..\..\src\state.c" />
     <ClCompile Include="..\..\src\tamatool.cpp" />
     <ClCompile Include="bmp.cpp" />
+    <ClCompile Include="getopt.c" />
     <ClCompile Include="main.cpp_no" />
     <ClCompile Include="winDir.cpp" />
   </ItemGroup>
@@ -98,6 +99,7 @@
     <ClInclude Include="..\..\src\program.h" />
     <ClInclude Include="..\..\src\state.h" />
     <ClInclude Include="bmp.h" />
+    <ClInclude Include="getopt.h" />
     <ClInclude Include="winDir.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

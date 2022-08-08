@@ -189,4 +189,6 @@ void cpu_release(void);
 
 int cpu_step(void);
 
+extern state_t cpu_state;
+
 #endif /* _CPU_H_ */

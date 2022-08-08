@@ -37,14 +37,27 @@ static u8_t g_framerate = DEFAULT_FRAMERATE;
 hal_t *g_hal;
 
 
-bool_t tamalib_init(const u12_t *program, breakpoint_t *breakpoints, u32_t freq)
-{
+bool_t tamalib_init(const u12_t *program, breakpoint_t *breakpoints, u32_t freq){
 	bool_t res = 0;
 
 	res |= cpu_init(program, breakpoints, freq);
 	res |= hw_init();
 
 	ts_freq = freq;
+
+	hal.malloc = &hal_malloc;
+	hal.free = &hal_free;
+	hal.halt = &hal_halt;
+	hal.is_log_enabled = &hal_is_log_enabled;
+	hal.log = &hal_log;
+	hal.sleep_until = &hal_sleep_until;
+	hal.get_timestamp = &hal_get_timestamp;
+	hal.update_screen = &hal_update_screen;
+	hal.set_lcd_matrix = &hal_set_lcd_matrix;
+	hal.set_lcd_icon = &hal_set_lcd_icon;
+	hal.set_frequency = &hal_set_frequency;
+	hal.play_frequency = &hal_play_frequency;
+	hal.handler = &hal_handler;
 
 	return res;
 }

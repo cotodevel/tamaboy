@@ -63,4 +63,19 @@ void tamalib_set_exec_mode(exec_mode_t mode);
 void tamalib_step(void);
 void tamalib_mainloop(void);
 
+extern hal_t hal;
+extern void * hal_malloc(u32_t size);
+extern void hal_free(void *ptr);
+extern void hal_halt(void);
+extern bool_t hal_is_log_enabled(log_level_t level);
+extern void hal_log(log_level_t level, char *buff, ...);
+extern void hal_sleep_until(timestamp_t ts);
+extern timestamp_t hal_get_timestamp(void);
+extern void hal_update_screen(void);
+extern void hal_set_lcd_matrix(u8_t x, u8_t y, bool_t val);
+extern void hal_set_lcd_icon(u8_t icon, bool_t val);
+extern void hal_set_frequency(u32_t freq);
+extern void hal_play_frequency(bool_t en);
+extern int hal_handler(void);
+
 #endif /* _TAMALIB_H_ */

@@ -162,29 +162,7 @@ static u32_t ts_freq;
 static u8_t speed_ratio = 1;
 static timestamp_t ref_ts;
 
-static state_t cpu_state = {
-	.pc = &pc,
-	.x = &x,
-	.y = &y,
-	.a = &a,
-	.b = &b,
-	.np = &np,
-	.sp = &sp,
-	.flags = &flags,
-
-	.tick_counter = &tick_counter,
-	.clk_timer_timestamp = &clk_timer_timestamp,
-	.prog_timer_timestamp = &prog_timer_timestamp,
-	.prog_timer_enabled = &prog_timer_enabled,
-	.prog_timer_data = &prog_timer_data,
-	.prog_timer_rld = &prog_timer_rld,
-
-	.call_depth = &call_depth,
-
-	.interrupts = interrupts,
-
-	.memory = memory,
-};
+state_t cpu_state;
 
 
 void cpu_add_bp(breakpoint_t **list, u13_t addr)
@@ -1660,6 +1638,24 @@ static void print_state(u8_t op_num, u12_t op, u13_t addr)
 
 void cpu_reset(void)
 {
+	cpu_state.pc = &pc;
+	cpu_state.x = &x;
+	cpu_state.y = &y;
+	cpu_state.a = &a;
+	cpu_state.b = &b;
+	cpu_state.np = &np;
+	cpu_state.sp = &sp;
+	cpu_state.flags = &flags;
+	cpu_state.tick_counter = &tick_counter;
+	cpu_state.clk_timer_timestamp = &clk_timer_timestamp;
+	cpu_state.prog_timer_timestamp = &prog_timer_timestamp;
+	cpu_state.prog_timer_enabled = &prog_timer_enabled;
+	cpu_state.prog_timer_data = &prog_timer_data;
+	cpu_state.prog_timer_rld = &prog_timer_rld;
+	cpu_state.call_depth = &call_depth;
+	cpu_state.interrupts = interrupts;
+	cpu_state.memory = memory;
+
 	u13_t i;
 
 	/* Registers and variables init */
