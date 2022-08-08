@@ -166,29 +166,37 @@ typedef struct {
 	MEM_BUFFER_TYPE *memory;
 } state_t;
 
-
-void cpu_add_bp(breakpoint_t **list, u13_t addr);
-void cpu_free_bp(breakpoint_t **list);
-
-void cpu_set_speed(u8_t speed);
-
-state_t * cpu_get_state(void);
-
-u32_t cpu_get_depth(void);
-
-void cpu_set_input_pin(pin_t pin, pin_state_t state);
-
-void cpu_sync_ref_timestamp(void);
-
-void cpu_refresh_hw(void);
-
-void cpu_reset(void);
-
-bool_t cpu_init(const u12_t *program, breakpoint_t *breakpoints, u32_t freq);
-void cpu_release(void);
-
-int cpu_step(void);
-
 extern state_t cpu_state;
 
 #endif /* _CPU_H_ */
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern void cpu_add_bp(breakpoint_t **list, u13_t addr);
+extern void cpu_free_bp(breakpoint_t **list);
+
+extern void cpu_set_speed(u8_t speed);
+
+extern state_t * cpu_get_state(void);
+
+extern u32_t cpu_get_depth(void);
+
+extern void cpu_set_input_pin(pin_t pin, pin_state_t state);
+
+extern void cpu_sync_ref_timestamp(void);
+
+extern void cpu_refresh_hw(void);
+
+extern void cpu_reset(void);
+
+extern bool_t cpu_init(const u12_t *program, breakpoint_t *breakpoints, u32_t freq);
+extern void cpu_release(void);
+
+extern int cpu_step(void);
+
+#ifdef __cplusplus
+}
+#endif

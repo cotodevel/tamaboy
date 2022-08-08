@@ -24,11 +24,18 @@
 
 #define MAX_SPRITES			256
 
-
-u12_t * program_load(char *path, uint32_t *size);
-void program_save(char *path, u12_t *program, uint32_t size);
-void program_to_header(u12_t *program, uint32_t size);
-void program_get_data(u12_t *program, uint32_t size, char *path);
-void program_set_data(u12_t *program, uint32_t size, char *path);
-
 #endif /* _PROGRAM_H_ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern u12_t * program_load(char *path, uint32_t *size);
+extern void program_save(char *path, u12_t *program, uint32_t size);
+extern void program_to_header(u12_t *program, uint32_t size);
+extern void program_get_data(u12_t *program, uint32_t size, char *path);
+extern void program_set_data(u12_t *program, uint32_t size, char *path);
+
+#ifdef __cplusplus
+}
+#endif

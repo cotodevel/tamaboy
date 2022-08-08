@@ -722,6 +722,7 @@ static const struct option long_options[] = {
 	{0, 0, 0, 0}
 };
 
+//entrypoint
 int main(int argc, char **argv)
 {
 	char rom_path[256] = ROM_PATH;
@@ -747,7 +748,7 @@ int main(int argc, char **argv)
 			break;
 
 		switch (c) {
-			case 0:	/* getopt_long() flag */
+			case 0:	// getopt_long() flag 
 				break;
 
 			case 'r':
@@ -817,7 +818,7 @@ int main(int argc, char **argv)
 	}
 
 	if (gen_header || extract_sprites || modify_sprites) {
-		/* ROM manipulation only (no emulation) */
+		// ROM manipulation only (no emulation) 
 		if (gen_header) {
 			program_to_header(g_program, g_program_size);
 		} else if (extract_sprites) {
@@ -854,7 +855,7 @@ int main(int argc, char **argv)
 	}
 
 	if (memory_editor_enable) {
-		/* Logs are not compatible with the memory editor */
+		// Logs are not compatible with the memory editor 
 		log_levels = LOG_ERROR;
 		mem_edit_configure_terminal();
 	}

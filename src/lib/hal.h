@@ -84,6 +84,14 @@ typedef struct {
 	int (*handler)(void);
 } hal_t;
 
+#endif /* _HAL_H_ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern hal_t *g_hal;
 
-#endif /* _HAL_H_ */
+#ifdef __cplusplus
+}
+#endif

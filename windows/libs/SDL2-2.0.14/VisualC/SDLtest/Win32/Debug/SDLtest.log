@@ -1,4 +1,4 @@
-﻿Build started 07/08/2022 0:56:52.
+﻿Build started 07/08/2022 22:35:41.
      1>Project "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\SDLtest\SDLtest.vcxproj" on node 2 (Rebuild target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\SDLtest\/../../include" /Z7 /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0700 /Gm- /EHsc /MD /GS- /arch:SSE /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Win32\Debug\\" /Fd"Win32\Debug\vc110.pdb" /Gd /TC /analyze- /Zl /errorReport:prompt ..\..\src\test\SDL_test_assert.c ..\..\src\test\SDL_test_common.c ..\..\src\test\SDL_test_compare.c ..\..\src\test\SDL_test_crc32.c ..\..\src\test\SDL_test_font.c ..\..\src\test\SDL_test_fuzzer.c ..\..\src\test\SDL_test_harness.c ..\..\src\test\SDL_test_imageBlit.c ..\..\src\test\SDL_test_imageBlitBlend.c ..\..\src\test\SDL_test_imageFace.c ..\..\src\test\SDL_test_imagePrimitives.c ..\..\src\test\SDL_test_imagePrimitivesBlend.c ..\..\src\test\SDL_test_log.c ..\..\src\test\SDL_test_md5.c ..\..\src\test\SDL_test_memory.c ..\..\src\test\SDL_test_random.c
@@ -41,4 +41,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:07.79
+Time Elapsed 00:00:04.83

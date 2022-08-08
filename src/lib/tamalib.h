@@ -46,22 +46,28 @@ typedef enum {
 } exec_mode_t;
 
 
-void tamalib_release(void);
-bool_t tamalib_init(const u12_t *program, breakpoint_t *breakpoints, u32_t freq);
+#endif /* _TAMALIB_H_ */
 
-void tamalib_set_framerate(u8_t framerate);
-u8_t tamalib_get_framerate(void);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void tamalib_register_hal(hal_t *hal);
+extern void tamalib_release(void);
+extern bool_t tamalib_init(const u12_t *program, breakpoint_t *breakpoints, u32_t freq);
 
-void tamalib_set_exec_mode(exec_mode_t mode);
+extern void tamalib_set_framerate(u8_t framerate);
+extern u8_t tamalib_get_framerate(void);
+
+extern void tamalib_register_hal(hal_t *hal);
+
+extern void tamalib_set_exec_mode(exec_mode_t mode);
 
 /* NOTE: Only one of these two functions must be used in the main application
  * (tamalib_step() should be used only if tamalib_mainloop() does not fit the
  * main application execution flow).
  */
-void tamalib_step(void);
-void tamalib_mainloop(void);
+extern void tamalib_step(void);
+extern void tamalib_mainloop(void);
 
 extern hal_t hal;
 extern void * hal_malloc(u32_t size);
@@ -78,4 +84,9 @@ extern void hal_set_frequency(u32_t freq);
 extern void hal_play_frequency(bool_t en);
 extern int hal_handler(void);
 
-#endif /* _TAMALIB_H_ */
+extern int main(int argc, char **argv);
+
+
+#ifdef __cplusplus
+}
+#endif

@@ -20,8 +20,16 @@
 #ifndef _MEM_EDIT_H_
 #define _MEM_EDIT_H_
 
-void mem_edit_reset_terminal(void);
-void mem_edit_configure_terminal(void);
-void mem_edit_update(void);
-
 #endif /* _MEM_EDIT_H_ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern void mem_edit_reset_terminal(void);
+extern void mem_edit_configure_terminal(void);
+extern void mem_edit_update(void);
+
+#ifdef __cplusplus
+}
+#endif

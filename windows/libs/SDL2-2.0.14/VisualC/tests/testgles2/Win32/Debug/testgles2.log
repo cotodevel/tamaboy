@@ -1,4 +1,4 @@
-﻿Build started 07/08/2022 0:58:13.
+﻿Build started 07/08/2022 22:36:34.
      1>Project "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\tests\testgles2\testgles2.vcxproj" on node 2 (Rebuild target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\/../include" /Z7 /nologo /W3 /WX- /Od /Oy- /D _DEBUG /D WIN32 /D _WINDOWS /D HAVE_OPENGL /D _VC80_UPGRADE=0x0700 /Gm- /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Win32\Debug\\" /Fd"Win32\Debug\vc110.pdb" /Gd /TC /analyze- /errorReport:prompt ..\..\..\test\testgles2.c
@@ -8,9 +8,11 @@
          "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\SDL2.lib"
          "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\SDL2main.lib"
          "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\SDL2test.lib"
-         testgles2.vcxproj -> C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\testgles2.exe
-     1>Done Building Project "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\tests\testgles2\testgles2.vcxproj" (Rebuild target(s)).
+     1>SDL2main.lib(SDL_windows_main.obj) : error LNK2005: _main already defined in testgles2.obj
+     1>SDL2main.lib(SDL_windows_main.obj) : error LNK2019: unresolved external symbol _SDL_main referenced in function _main_getcmdline
+     1>C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\testgles2.exe : fatal error LNK1120: 1 unresolved externals
+     1>Done Building Project "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\tests\testgles2\testgles2.vcxproj" (Rebuild target(s)) -- FAILED.
 
-Build succeeded.
+Build FAILED.
 
-Time Elapsed 00:00:01.73
+Time Elapsed 00:00:00.45

@@ -1,4 +1,4 @@
-﻿Build started 07/08/2022 0:58:11.
+﻿Build started 07/08/2022 22:36:33.
      1>Project "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\tests\testsprite2\testsprite2.vcxproj" on node 2 (Rebuild target(s)).
      1>CustomBuild:
          Copying icon.bmp
@@ -11,9 +11,11 @@
          "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\SDL2.lib"
          "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\SDL2main.lib"
          "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\SDL2test.lib"
-         testsprite2.vcxproj -> C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\testsprite2.exe
-     1>Done Building Project "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\tests\testsprite2\testsprite2.vcxproj" (Rebuild target(s)).
+     1>SDL2main.lib(SDL_windows_main.obj) : error LNK2005: _main already defined in testsprite2.obj
+     1>SDL2main.lib(SDL_windows_main.obj) : error LNK2019: unresolved external symbol _SDL_main referenced in function _main_getcmdline
+     1>C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\Win32\Debug\testsprite2.exe : fatal error LNK1120: 1 unresolved externals
+     1>Done Building Project "C:\bitbucket_clone\tamaboy\windows\libs\SDL2-2.0.14\VisualC\tests\testsprite2\testsprite2.vcxproj" (Rebuild target(s)) -- FAILED.
 
-Build succeeded.
+Build FAILED.
 
-Time Elapsed 00:00:01.52
+Time Elapsed 00:00:00.58

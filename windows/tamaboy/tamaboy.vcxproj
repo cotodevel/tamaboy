@@ -85,7 +85,6 @@
     <ClCompile Include="..\..\src\tamatool.cpp" />
     <ClCompile Include="bmp.cpp" />
     <ClCompile Include="getopt.c" />
-    <ClCompile Include="main.cpp_no" />
     <ClCompile Include="winDir.cpp" />
   </ItemGroup>
   <ItemGroup>

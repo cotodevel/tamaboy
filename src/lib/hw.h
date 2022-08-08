@@ -38,14 +38,21 @@ typedef enum {
 	BTN_RIGHT,
 } button_t;
 
-
-bool_t hw_init(void);
-void hw_release(void);
-
-void hw_set_lcd_pin(u8_t seg, u8_t com, u8_t val);
-void hw_set_button(button_t btn, btn_state_t state);
-
-void hw_set_buzzer_freq(u4_t freq);
-void hw_enable_buzzer(bool_t en);
-
 #endif /* _HW_H_ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern bool_t hw_init(void);
+extern void hw_release(void);
+
+extern void hw_set_lcd_pin(u8_t seg, u8_t com, u8_t val);
+extern void hw_set_button(button_t btn, btn_state_t state);
+
+extern void hw_set_buzzer_freq(u4_t freq);
+extern void hw_enable_buzzer(bool_t en);
+
+#ifdef __cplusplus
+}
+#endif

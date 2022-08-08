@@ -21,9 +21,6 @@
     <ClCompile Include="winDir.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp_no">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\mem_edit.c">
       <Filter>Source Files</Filter>
     </ClCompile>

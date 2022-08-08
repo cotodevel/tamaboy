@@ -22,10 +22,17 @@
 
 #define STATE_TEMPLATE			"save%u.bin"
 
-
-void state_find_next_name(char *path);
-void state_find_last_name(char *path);
-void state_save(char *path);
-void state_load(char *path);
-
 #endif /* _STATE_H_ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern void state_find_next_name(char *path);
+extern void state_find_last_name(char *path);
+extern void state_save(char *path);
+extern void state_load(char *path);
+
+#ifdef __cplusplus
+}
+#endif
