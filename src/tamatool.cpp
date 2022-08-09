@@ -738,6 +738,7 @@ int main(int argc, char **argv)
 
 	tamalib_register_hal(&hal);
 
+	/*
 	for (;;) {
 		int index;
 		int c;
@@ -808,6 +809,7 @@ int main(int argc, char **argv)
 				exit(EXIT_FAILURE);
 		}
 	}
+	*/
 
 	g_program = program_load(rom_path, &g_program_size);
 	if (g_program == NULL) {

@@ -20,6 +20,7 @@
 #include "hw.h"
 #include "cpu.h"
 #include "hal.h"
+#include "tamalib.h"
 
 /* SEG -> LCD mapping */
 static u8_t seg_pos[40] = {0, 1, 2, 3, 4, 5, 6, 7, 32, 8, 9, 10, 11, 12 ,13 ,14, 15, 33, 34, 35, 31, 30, 29, 28, 27, 26, 25, 24, 36, 23, 22, 21, 20, 19, 18, 17, 16, 37, 38, 39};
@@ -42,7 +43,7 @@ void hw_release(void)
 void hw_set_lcd_pin(u8_t seg, u8_t com, u8_t val)
 {
 	if (seg_pos[seg] < LCD_WIDTH) {
-		g_hal->set_lcd_matrix(seg_pos[seg], com, val);
+		hal.set_lcd_matrix(seg_pos[seg], com, val);
 	} else {
 		/*
 		 * IC n -> seg-com|...
@@ -56,9 +57,9 @@ void hw_set_lcd_pin(u8_t seg, u8_t com, u8_t val)
 		 * IC 7 -> 28-15|38-12|39-13
 		 */
 		if (seg == 8 && com < 4) {
-			g_hal->set_lcd_icon(com, val);
+			hal.set_lcd_icon(com, val);
 		} else if (seg == 28 && com >= 12) {
-			g_hal->set_lcd_icon(com - 8, val);
+			hal.set_lcd_icon(com - 8, val);
 		}
 	}
 }
@@ -129,11 +130,11 @@ void hw_set_buzzer_freq(u4_t freq)
 	}
 
 	if (snd_freq != 0) {
-		g_hal->set_frequency(snd_freq);
+		hal.set_frequency(snd_freq);
 	}
 }
 
 void hw_enable_buzzer(bool_t en)
 {
-	g_hal->play_frequency(en);
+	hal.play_frequency(en);
 }

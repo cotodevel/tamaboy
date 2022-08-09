@@ -90,7 +90,6 @@ typedef struct {
 extern "C" {
 #endif
 
-extern hal_t *g_hal;
 
 #ifdef __cplusplus
 }

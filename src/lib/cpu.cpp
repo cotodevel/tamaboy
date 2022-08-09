@@ -20,6 +20,7 @@
 #include "cpu.h"
 #include "hw.h"
 #include "hal.h"
+#include "tamalib.h"
 
 #define TICK_FREQUENCY				32768 // Hz
 
@@ -169,9 +170,9 @@ void cpu_add_bp(breakpoint_t **list, u13_t addr)
 {
 	breakpoint_t *bp;
 
-	bp = (breakpoint_t *) g_hal->malloc(sizeof(breakpoint_t));
+	bp = (breakpoint_t *) hal.malloc(sizeof(breakpoint_t));
 	if (!bp) {
-		g_hal->log(LOG_ERROR, "Cannot allocate memory for breakpoint 0x%04X!\n", addr);
+		hal.log(LOG_ERROR, "Cannot allocate memory for breakpoint 0x%04X!\n", addr);
 		return;
 	}
 
@@ -193,7 +194,7 @@ void cpu_free_bp(breakpoint_t **list)
 
 	while (bp != NULL) {
 		tmp = bp->next;
-		g_hal->free(bp);
+		hal.free(bp);
 		bp = tmp;
 	}
 
@@ -247,7 +248,7 @@ void cpu_set_input_pin(pin_t pin, pin_state_t state)
 
 void cpu_sync_ref_timestamp(void)
 {
-	ref_ts = g_hal->get_timestamp();
+	ref_ts = hal.get_timestamp();
 }
 
 static u4_t get_io(u12_t n)
@@ -384,7 +385,7 @@ static u4_t get_io(u12_t n)
 			break;
 
 		default:
-			g_hal->log(LOG_ERROR,   "Read from unimplemented I/O 0x%03X - PC = 0x%04X\n", n, pc);
+			hal.log(LOG_ERROR,   "Read from unimplemented I/O 0x%03X - PC = 0x%04X\n", n, pc);
 	}
 
 	return 0;
@@ -446,7 +447,7 @@ static void set_io(u12_t n, u4_t v)
 
 		case REG_K40_K43_BZ_OUTPUT_PORT:
 			/* Output port (R40-R43) */
-			//g_hal->log(LOG_INFO, "Output/Buzzer: 0x%X\n", v);
+			//hal.log(LOG_INFO, "Output/Buzzer: 0x%X\n", v);
 			hw_enable_buzzer(!(v & 0x8));
 			break;
 
@@ -506,7 +507,7 @@ static void set_io(u12_t n, u4_t v)
 			break;
 
 		default:
-			g_hal->log(LOG_ERROR,   "Write 0x%X to unimplemented I/O 0x%03X - PC = 0x%04X\n", v, n, pc);
+			hal.log(LOG_ERROR,   "Write 0x%X to unimplemented I/O 0x%03X - PC = 0x%04X\n", v, n, pc);
 	}
 }
 
@@ -529,26 +530,26 @@ static u4_t get_memory(u12_t n)
 
 	if (n < MEM_RAM_SIZE) {
 		/* RAM */
-		g_hal->log(LOG_MEMORY, "RAM              - ");
+		hal.log(LOG_MEMORY, "RAM              - ");
 		res = GET_RAM_MEMORY(memory, n);
 	} else if (n >= MEM_DISPLAY1_ADDR && n < (MEM_DISPLAY1_ADDR + MEM_DISPLAY1_SIZE)) {
 		/* Display Memory 1 */
-		g_hal->log(LOG_MEMORY, "Display Memory 1 - ");
+		hal.log(LOG_MEMORY, "Display Memory 1 - ");
 		res = GET_DISP1_MEMORY(memory, n);
 	} else if (n >= MEM_DISPLAY2_ADDR && n < (MEM_DISPLAY2_ADDR + MEM_DISPLAY2_SIZE)) {
 		/* Display Memory 2 */
-		g_hal->log(LOG_MEMORY, "Display Memory 2 - ");
+		hal.log(LOG_MEMORY, "Display Memory 2 - ");
 		res = GET_DISP2_MEMORY(memory, n);
 	} else if (n >= MEM_IO_ADDR && n < (MEM_IO_ADDR + MEM_IO_SIZE)) {
 		/* I/O Memory */
-		g_hal->log(LOG_MEMORY, "I/O              - ");
+		hal.log(LOG_MEMORY, "I/O              - ");
 		res = get_io(n);
 	} else {
-		g_hal->log(LOG_ERROR,   "Read from invalid memory address 0x%03X - PC = 0x%04X\n", n, pc);
+		hal.log(LOG_ERROR,   "Read from invalid memory address 0x%03X - PC = 0x%04X\n", n, pc);
 		return 0;
 	}
 
-	g_hal->log(LOG_MEMORY, "Read  0x%X - Address 0x%03X - PC = 0x%04X\n", res, n, pc);
+	hal.log(LOG_MEMORY, "Read  0x%X - Address 0x%03X - PC = 0x%04X\n", res, n, pc);
 
 	return res;
 }
@@ -559,28 +560,28 @@ static void set_memory(u12_t n, u4_t v)
 	if (n < MEM_RAM_SIZE) {
 		/* RAM */
 		SET_RAM_MEMORY(memory, n, v);
-		g_hal->log(LOG_MEMORY, "RAM              - ");
+		hal.log(LOG_MEMORY, "RAM              - ");
 	} else if (n >= MEM_DISPLAY1_ADDR && n < (MEM_DISPLAY1_ADDR + MEM_DISPLAY1_SIZE)) {
 		/* Display Memory 1 */
 		SET_DISP1_MEMORY(memory, n, v);
 		set_lcd(n, v);
-		g_hal->log(LOG_MEMORY, "Display Memory 1 - ");
+		hal.log(LOG_MEMORY, "Display Memory 1 - ");
 	} else if (n >= MEM_DISPLAY2_ADDR && n < (MEM_DISPLAY2_ADDR + MEM_DISPLAY2_SIZE)) {
 		/* Display Memory 2 */
 		SET_DISP2_MEMORY(memory, n, v);
 		set_lcd(n, v);
-		g_hal->log(LOG_MEMORY, "Display Memory 2 - ");
+		hal.log(LOG_MEMORY, "Display Memory 2 - ");
 	} else if (n >= MEM_IO_ADDR && n < (MEM_IO_ADDR + MEM_IO_SIZE)) {
 		/* I/O Memory */
 		SET_IO_MEMORY(memory, n, v);
 		set_io(n, v);
-		g_hal->log(LOG_MEMORY, "I/O              - ");
+		hal.log(LOG_MEMORY, "I/O              - ");
 	} else {
-		g_hal->log(LOG_ERROR,   "Write 0x%X to invalid memory address 0x%03X - PC = 0x%04X\n", v, n, pc);
+		hal.log(LOG_ERROR,   "Write 0x%X to invalid memory address 0x%03X - PC = 0x%04X\n", v, n, pc);
 		return;
 	}
 
-	g_hal->log(LOG_MEMORY, "Write 0x%X - Address 0x%03X - PC = 0x%04X\n", v, n, pc);
+	hal.log(LOG_MEMORY, "Write 0x%X - Address 0x%03X - PC = 0x%04X\n", v, n, pc);
 }
 
 void cpu_refresh_hw(void){
@@ -746,7 +747,7 @@ static void op_nop7_cb(u8_t arg0, u8_t arg1)
 
 static void op_halt_cb(u8_t arg0, u8_t arg1)
 {
-	g_hal->halt();
+	hal.halt();
 }
 
 static void op_inc_x_cb(u8_t arg0, u8_t arg1)
@@ -1569,11 +1570,11 @@ static timestamp_t wait_for_cycles(timestamp_t since, u8_t cycles) {
 
 	if (speed_ratio == 0) {
 		/* Emulation will be as fast as possible */
-		return g_hal->get_timestamp();
+		return hal.get_timestamp();
 	}
 
 	deadline = since + (cycles * ts_freq)/(TICK_FREQUENCY * speed_ratio);
-	g_hal->sleep_until(deadline);
+	hal.sleep_until(deadline);
 
 	return deadline;
 }
@@ -1605,35 +1606,35 @@ static void print_state(u8_t op_num, u12_t op, u13_t addr)
 {
 	u8_t i;
 
-	if (!g_hal->is_log_enabled(LOG_CPU)) {
+	if (!hal.is_log_enabled(LOG_CPU)) {
 		return;
 	}
 
-	g_hal->log(LOG_CPU, "0x%04X: ", addr);
+	hal.log(LOG_CPU, "0x%04X: ", addr);
 
 	for (i = 0; i < call_depth; i++) {
-		g_hal->log(LOG_CPU, "  ");
+		hal.log(LOG_CPU, "  ");
 	}
 
 	if (ops[op_num].mask_arg0 != 0) {
 		/* Two arguments */
-		g_hal->log(LOG_CPU, ops[op_num].log, (op & ops[op_num].mask_arg0) >> ops[op_num].shift_arg0, op & ~(ops[op_num].mask | ops[op_num].mask_arg0));
+		hal.log(LOG_CPU, ops[op_num].log, (op & ops[op_num].mask_arg0) >> ops[op_num].shift_arg0, op & ~(ops[op_num].mask | ops[op_num].mask_arg0));
 	} else {
 		/* One argument */
-		g_hal->log(LOG_CPU, ops[op_num].log, (op & ~ops[op_num].mask) >> ops[op_num].shift_arg0);
+		hal.log(LOG_CPU, ops[op_num].log, (op & ~ops[op_num].mask) >> ops[op_num].shift_arg0);
 	}
 
 	if (call_depth < 10) {
 		for (i = 0; i < (10 - call_depth); i++) {
-			g_hal->log(LOG_CPU, "  ");
+			hal.log(LOG_CPU, "  ");
 		}
 	}
 
-	g_hal->log(LOG_CPU, " ; 0x%03X - ", op);
+	hal.log(LOG_CPU, " ; 0x%03X - ", op);
 	for (i = 0; i < 12; i++) {
-		g_hal->log(LOG_CPU, "%s", ((op >> (11 - i)) & 0x1) ? "1" : "0");
+		hal.log(LOG_CPU, "%s", ((op >> (11 - i)) & 0x1) ? "1" : "0");
 	}
-	g_hal->log(LOG_CPU, " - PC = 0x%04X, SP = 0x%02X, NP = 0x%02X, X = 0x%03X, Y = 0x%03X, A = 0x%X, B = 0x%X, F = 0x%X\n", pc, sp, np, x, y, a, b, flags);
+	hal.log(LOG_CPU, " - PC = 0x%04X, SP = 0x%02X, NP = 0x%02X, X = 0x%03X, Y = 0x%03X, A = 0x%X, B = 0x%X, F = 0x%X\n", pc, sp, np, x, y, a, b, flags);
 }
 
 void cpu_reset(void)
@@ -1712,7 +1713,7 @@ int cpu_step(void)
 	}
 
 	if (ops[i].log == NULL) {
-		g_hal->log(LOG_ERROR, "Unknown op-code 0x%X (pc = 0x%04X)\n", op, pc);
+		hal.log(LOG_ERROR, "Unknown op-code 0x%X (pc = 0x%04X)\n", op, pc);
 		return 1;
 	}
 
