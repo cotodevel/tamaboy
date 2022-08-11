@@ -83,9 +83,6 @@
     <ClCompile Include="..\..\src\program.c" />
     <ClCompile Include="..\..\src\state.c" />
     <ClCompile Include="..\..\src\tamatool.cpp" />
-    <ClCompile Include="bmp.cpp" />
-    <ClCompile Include="getopt.c" />
-    <ClCompile Include="winDir.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\hal_types.h" />
@@ -97,9 +94,6 @@
     <ClInclude Include="..\..\src\mem_edit.h" />
     <ClInclude Include="..\..\src\program.h" />
     <ClInclude Include="..\..\src\state.h" />
-    <ClInclude Include="bmp.h" />
-    <ClInclude Include="getopt.h" />
-    <ClInclude Include="winDir.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

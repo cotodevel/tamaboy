@@ -25,7 +25,6 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
-#include "..\windows\tamaboy\getopt.h"
 #if defined(WIN32)
 #include <time.h>
 #endif
@@ -705,7 +704,7 @@ static void usage(FILE * fp, int argc, char **argv)
 }
 
 static const char short_options[] = "r:E:M:Hl:sb:mecvh";
-
+/*
 static const struct option long_options[] = {
 	{"rom", required_argument, NULL, 'r'},
 	{"extract", required_argument, NULL, 'E'},
@@ -721,7 +720,7 @@ static const struct option long_options[] = {
 	{"help", no_argument, NULL, 'h'},
 	{0, 0, 0, 0}
 };
-
+*/
 //entrypoint
 int main(int argc, char **argv)
 {

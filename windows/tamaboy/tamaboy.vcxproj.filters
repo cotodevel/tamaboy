@@ -15,12 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bmp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="winDir.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\mem_edit.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -45,17 +39,8 @@
     <ClCompile Include="..\..\src\lib\cpu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="getopt.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bmp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="winDir.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\program.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -81,9 +66,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mem_edit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="getopt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
