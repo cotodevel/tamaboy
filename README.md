@@ -26,7 +26,7 @@ Saving: Press the Save & Exit button. If you're using hardware, it should turn o
 Reading Save: Loading saved tamagotchi happens automatically on boot. Sometimes it can take up to 10~ minutes or even more, please wait... it WILL load! A drumming intro will play when the pet has loaded.
 !!!!!!!!!!!!
 
-RTC: Implemented correctly. Reads from internal NDS RTC clock in real time!
+RTC: You must manually update the clock by entering the clock (DOWN) then pressing LEFT + RIGHT. The NDS RTC code I added originally may break internal events, so it's disabled.
 
 ## Compile Time Dependencies
 
@@ -67,6 +67,6 @@ and toolchaingenericds-multiboot-config.txt (update here, the computer's IP you 
   After that, everytime you want to remoteboot a TGDS Project, repeat the last 2 steps. ;-)
 
 
-
+Latest stable release: https://bitbucket.org/Coto88/tamaboy/get/TGDS1.65.zip
 
 Coto
