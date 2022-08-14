@@ -1,3 +1,6 @@
+//disable _CRT_SECURE_NO_WARNINGS message to build this in VC++
+#pragma warning(disable:4996)
+
 /*
  * TamaTool - A cross-platform Tamagotchi P1 explorer
  *
@@ -20,24 +23,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#include "tamalib.h"
+
+#ifdef WIN32
+#include "SDL.h"
+#endif
+
+#include "lib/tamalib.h"
 #include "state.h"
-#include "fatfslayerTGDS.h"
+#include "ff.h"
 #include "debugNocash.h"
-#include "WoopsiTemplate.h"
-#include "ipcfifoTGDS.h"
-#include "nds_cp15_misc.h"
+#include "fatfslayerTGDS.h"
 
 #define STATE_FILE_MAGIC				"TLST"
 #define STATE_FILE_VERSION				2
 
-#if (defined(__GNUC__) && !defined(__clang__))
-__attribute__((optimize("O0")))
-#endif
-
-#if (!defined(__GNUC__) && defined(__clang__))
-__attribute__ ((optnone))
-#endif
 static uint32_t find_next_slot(void)
 {
 	char path[256];
@@ -45,8 +44,7 @@ static uint32_t find_next_slot(void)
 
 	for (i = 0;; i++) {
 		sprintf(path, STATE_TEMPLATE, i);
-		if (FileExists(path) == FT_FILE) {
-			nocashMessage("find_next_slot(): found!");
+		if (!fopen(path, "r")) {
 			break;
 		}
 	}
@@ -54,25 +52,11 @@ static uint32_t find_next_slot(void)
 	return i;
 }
 
-#if (defined(__GNUC__) && !defined(__clang__))
-__attribute__((optimize("O0")))
-#endif
-
-#if (!defined(__GNUC__) && defined(__clang__))
-__attribute__ ((optnone))
-#endif
 void state_find_next_name(char *path)
 {
 	sprintf(path, STATE_TEMPLATE, find_next_slot());
 }
 
-#if (defined(__GNUC__) && !defined(__clang__))
-__attribute__((optimize("O0")))
-#endif
-
-#if (!defined(__GNUC__) && defined(__clang__))
-__attribute__ ((optnone))
-#endif
 void state_find_last_name(char *path)
 {
 	uint32_t num = find_next_slot();
@@ -84,285 +68,290 @@ void state_find_last_name(char *path)
 	}
 }
 
-#if (defined(__GNUC__) && !defined(__clang__))
-__attribute__((optimize("O0")))
-#endif
-
-#if (!defined(__GNUC__) && defined(__clang__))
-__attribute__ ((optnone))
-#endif
 void state_save(char *path)
 {
+	FIL fPagingFD;
 	state_t *state;
-	int bufOffset = 0;
-	u8 * buf = (u8*)TGDSARM9Malloc(8192);
-	buf+=(1024*1024*4); //cache gets in the way
-	
+	uint8_t buf[4];
 	uint32_t num = 0;
 	uint32_t i;
-	char dbgBuf[128];
-	
+	int writtenSize=0;
+	char debugBuf[256];
+
 	state = tamalib_get_state();
-	coherent_user_range_by_size((uint32)state, sizeof(state_t));//write state_t to sd? make it coherent 
-	coherent_user_range_by_size((uint32)state->interrupts, sizeof(state->interrupts)); 
-	coherent_user_range_by_size((uint32)state->memory, sizeof(state->memory));
-	
+
+	int flags = charPosixToFlagPosix("w+");
+	BYTE mode = posixToFatfsAttrib(flags);
+	FRESULT result = f_open(&fPagingFD, (const TCHAR*)path, mode);
+
+	if(result != FR_OK){
+		sprintf(debugBuf, "FATAL: Cannot create state file \"%s\" !", path);
+		nocashMessage(debugBuf);
+		return;
+	}
+
 	/* First the magic, then the version, and finally the fields of
 	 * the state_t struct written as u8, u16 little-endian or u32
 	 * little-endian following the struct order
 	 */
-	buf[bufOffset] = (uint8_t) STATE_FILE_MAGIC[0];
-	bufOffset++;
-	buf[bufOffset] = (uint8_t) STATE_FILE_MAGIC[1];
-	bufOffset++;
-	buf[bufOffset] = (uint8_t) STATE_FILE_MAGIC[2];
-	bufOffset++;
-	buf[bufOffset] = (uint8_t) STATE_FILE_MAGIC[3];
-	bufOffset++;
-	
-	buf[bufOffset] = STATE_FILE_VERSION & 0xFF;
-	bufOffset++;
+	f_lseek (
+			&fPagingFD,   /* Pointer to the file object structure */
+			(DWORD)0       /* File offset in unit of byte */
+		);
 
-	buf[bufOffset] = *(state->pc) & 0xFF;
-	bufOffset++;
-	buf[bufOffset] = (*(state->pc) >> 8) & 0x1F;
-	bufOffset++;
+	buf[0] = (uint8_t) STATE_FILE_MAGIC[0];
+	buf[1] = (uint8_t) STATE_FILE_MAGIC[1];
+	buf[2] = (uint8_t) STATE_FILE_MAGIC[2];
+	buf[3] = (uint8_t) STATE_FILE_MAGIC[3];
+	
+	result = f_write(&fPagingFD, buf, (int)4, (UINT*)&writtenSize);
+	num += writtenSize;
 
-	buf[bufOffset] = *(state->x) & 0xFF;
-	bufOffset++;
-	buf[bufOffset] = (*(state->x) >> 8) & 0xF;
-	bufOffset++;
-	
-	buf[bufOffset] = *(state->y) & 0xFF;
-	bufOffset++;
-	buf[bufOffset] = (*(state->y) >> 8) & 0xF;
-	bufOffset++;
-	
-	buf[bufOffset] = *(state->a) & 0xF;
-	bufOffset++;
-	
-	buf[bufOffset] = *(state->b) & 0xF;
-	bufOffset++;
-	
-	buf[bufOffset] = *(state->np) & 0x1F;
-	bufOffset++;
+	buf[0] = STATE_FILE_VERSION & 0xFF;
+	result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+	num += writtenSize;
 
-	buf[bufOffset] = *(state->sp) & 0xFF;
-	bufOffset++;
+	buf[0] = *(state->pc) & 0xFF;
+	buf[1] = (*(state->pc) >> 8) & 0x1F;
+	result = f_write(&fPagingFD, buf, (int)2, (UINT*)&writtenSize);
+	num += writtenSize;
 
-	buf[bufOffset] = *(state->flags) & 0xF;
-	bufOffset++;
-	
-	buf[bufOffset] = *(state->tick_counter) & 0xFF;
-	bufOffset++;
-	
-	buf[bufOffset] = (*(state->tick_counter) >> 8) & 0xFF;
-	bufOffset++;
-	
-	buf[bufOffset] = (*(state->tick_counter) >> 16) & 0xFF;
-	bufOffset++;
-	buf[bufOffset] = (*(state->tick_counter) >> 24) & 0xFF;
-	bufOffset++;
-	
-	buf[bufOffset] = *(state->clk_timer_timestamp) & 0xFF;
-	bufOffset++;
-	buf[bufOffset] = (*(state->clk_timer_timestamp) >> 8) & 0xFF;
-	bufOffset++;
-	buf[bufOffset] = (*(state->clk_timer_timestamp) >> 16) & 0xFF;
-	bufOffset++;
-	buf[bufOffset] = (*(state->clk_timer_timestamp) >> 24) & 0xFF;
-	bufOffset++;
-	
-	buf[bufOffset] = *(state->prog_timer_timestamp) & 0xFF;
-	bufOffset++;
-	buf[bufOffset] = (*(state->prog_timer_timestamp) >> 8) & 0xFF;
-	bufOffset++;
-	buf[bufOffset] = (*(state->prog_timer_timestamp) >> 16) & 0xFF;
-	bufOffset++;
-	buf[bufOffset] = (*(state->prog_timer_timestamp) >> 24) & 0xFF;
-	bufOffset++;
-	
-	buf[bufOffset] = *(state->prog_timer_enabled) & 0x1;
-	bufOffset++;
-	
-	buf[bufOffset] = *(state->prog_timer_data) & 0xFF;
-	bufOffset++;
-	
-	buf[bufOffset] = *(state->prog_timer_rld) & 0xFF;
-	bufOffset++;
-	
-	buf[bufOffset] = *(state->call_depth) & 0xFF;
-	bufOffset++;
-	
-	buf[bufOffset] = (*(state->call_depth) >> 8) & 0xFF;
-	bufOffset++;
-	
-	buf[bufOffset] = (*(state->call_depth) >> 16) & 0xFF;
-	bufOffset++;
-	
-	buf[bufOffset] = (*(state->call_depth) >> 24) & 0xFF;
-	bufOffset++;
-	
+	buf[0] = *(state->x) & 0xFF;
+	buf[1] = (*(state->x) >> 8) & 0xF;
+	result = f_write(&fPagingFD, buf, (int)2, (UINT*)&writtenSize);
+	num += writtenSize;
+
+	buf[0] = *(state->y) & 0xFF;
+	buf[1] = (*(state->y) >> 8) & 0xF;
+	result = f_write(&fPagingFD, buf, (int)2, (UINT*)&writtenSize);
+	num += writtenSize;
+
+	buf[0] = *(state->a) & 0xF;
+	result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+	num += writtenSize;
+
+	buf[0] = *(state->b) & 0xF;
+	result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+	num += writtenSize;
+
+	buf[0] = *(state->np) & 0x1F;
+	result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+	num += writtenSize;
+
+	buf[0] = *(state->sp) & 0xFF;
+	result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+	num += writtenSize;
+
+	buf[0] = *(state->flags) & 0xF;
+	result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+	num += writtenSize;
+
+	buf[0] = *(state->tick_counter) & 0xFF;
+	buf[1] = (*(state->tick_counter) >> 8) & 0xFF;
+	buf[2] = (*(state->tick_counter) >> 16) & 0xFF;
+	buf[3] = (*(state->tick_counter) >> 24) & 0xFF;
+	result = f_write(&fPagingFD, buf, (int)4, (UINT*)&writtenSize);
+	num += writtenSize;
+
+	buf[0] = *(state->clk_timer_timestamp) & 0xFF;
+	buf[1] = (*(state->clk_timer_timestamp) >> 8) & 0xFF;
+	buf[2] = (*(state->clk_timer_timestamp) >> 16) & 0xFF;
+	buf[3] = (*(state->clk_timer_timestamp) >> 24) & 0xFF;
+	result = f_write(&fPagingFD, buf, (int)4, (UINT*)&writtenSize);
+	num += writtenSize;
+
+	buf[0] = *(state->prog_timer_timestamp) & 0xFF;
+	buf[1] = (*(state->prog_timer_timestamp) >> 8) & 0xFF;
+	buf[2] = (*(state->prog_timer_timestamp) >> 16) & 0xFF;
+	buf[3] = (*(state->prog_timer_timestamp) >> 24) & 0xFF;
+	result = f_write(&fPagingFD, buf, (int)4, (UINT*)&writtenSize);
+	num += writtenSize;
+
+	buf[0] = *(state->prog_timer_enabled) & 0x1;
+	result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+	num += writtenSize;
+
+	buf[0] = *(state->prog_timer_data) & 0xFF;
+	result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+	num += writtenSize;
+
+	buf[0] = *(state->prog_timer_rld) & 0xFF;
+	result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+	num += writtenSize;
+
+	buf[0] = *(state->call_depth) & 0xFF;
+	buf[1] = (*(state->call_depth) >> 8) & 0xFF;
+	buf[2] = (*(state->call_depth) >> 16) & 0xFF;
+	buf[3] = (*(state->call_depth) >> 24) & 0xFF;
+	result = f_write(&fPagingFD, buf, (int)4, (UINT*)&writtenSize);
+	num += writtenSize;
+
 	for (i = 0; i < INT_SLOT_NUM; i++) {
-		buf[bufOffset] = state->interrupts[i].factor_flag_reg & 0xF;
-		bufOffset++;
-		
-		buf[bufOffset] = state->interrupts[i].mask_reg & 0xF;
-		bufOffset++;
-		
-		buf[bufOffset] = state->interrupts[i].triggered & 0x1;
-		bufOffset++;
+		buf[0] = state->interrupts[i].factor_flag_reg & 0xF;
+		result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+		num += writtenSize;
+
+		buf[0] = state->interrupts[i].mask_reg & 0xF;
+		result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+		num += writtenSize;
+
+		buf[0] = state->interrupts[i].triggered & 0x1;
+		result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+		num += writtenSize;
 	}
 
 	/* First 640 half bytes correspond to the RAM */
 	for (i = 0; i < MEM_RAM_SIZE; i++) {
-		buf[bufOffset] = state->memory[i + MEM_RAM_ADDR] & 0xF;
-		bufOffset++;
+		buf[0] = GET_RAM_MEMORY(state->memory, i + MEM_RAM_ADDR) & 0xF;
+		result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+		num += writtenSize;
 	}
 
 	/* I/Os are from 0xF00 to 0xF7F */
 	for (i = 0; i < MEM_IO_SIZE; i++) {
-		buf[bufOffset] = state->memory[i + MEM_IO_ADDR] & 0xF;
-		bufOffset++;
+		buf[0] = GET_IO_MEMORY(state->memory, i + MEM_IO_ADDR) & 0xF;
+		result = f_write(&fPagingFD, buf, (int)1, (UINT*)&writtenSize);
+		num += writtenSize;
 	}
-	
-	FS_saveFile(path, (char *)buf, 8192, true); //turns out filesize had to be 8192 bytes to write properly!
-	
-	struct sIPCSharedTGDS * TGDSIPC = TGDSIPCStartAddress;
-	sprintf(dbgBuf, "Written to state file \"%s\"!\nClock:%d:%d:%d\n", path, TGDSIPC->tmInst.tm_hour, TGDSIPC->tmInst.tm_min, TGDSIPC->tmInst.tm_sec);
-	printMessage((char *)dbgBuf);
-	
-	buf-=(1024*1024*4); //cache gets in the way
-	TGDSARM9Free(buf);
+
+	f_close(&fPagingFD);
 }
 
-#if (defined(__GNUC__) && !defined(__clang__))
-__attribute__((optimize("O0")))
-#endif
-
-#if (!defined(__GNUC__) && defined(__clang__))
-__attribute__ ((optnone))
-#endif
 void state_load(char *path)
 {
-	FILE *f;
+	FIL fPagingFD;
 	state_t *state;
-	int bufOffset = 0;
-	u8 * buf = (u8*)TGDSARM9Malloc(8192);
-	buf+=(1024*1024*4); //cache gets in the way
-	
+	uint8_t buf[4];
+	uint32_t num = 0;
 	uint32_t i;
-	char dbgBuf[128];
-	
+	int readSize=0;
+	char debugBuf[256];
+
 	state = tamalib_get_state();
 
-	f = fopen(path, "r");
-	if (f == NULL) {
-		//fprintf(stderr, "FATAL: Cannot open state file \"%s\" !\n", path);
-		sprintf(dbgBuf, "FATAL: Cannot open state file \"%s\" !\n", path);
-		nocashMessage(dbgBuf);
+	int flags = charPosixToFlagPosix("r");
+	BYTE mode = posixToFatfsAttrib(flags);
+	FRESULT result = f_open(&fPagingFD, (const TCHAR*)path, mode);
+	if(result != FR_OK){
+		sprintf(debugBuf, "FATAL: Cannot open state file \"%s\" !", path);
+		nocashMessage(debugBuf);
 		return;
 	}
-	
-	fread(buf, 1, 8192, f);
+	f_lseek (
+			&fPagingFD,   /* Pointer to the file object structure */
+			(DWORD)0       /* File offset in unit of byte */
+		);
 	/* First the magic, then the version, and finally the fields of
 	 * the state_t struct written as u8, u16 little-endian or u32
 	 * little-endian following the struct order
 	 */
+	result = f_read(&fPagingFD, buf, (int)4, (UINT*)&readSize);
+	num += readSize;
 	if (buf[0] != (uint8_t) STATE_FILE_MAGIC[0] || buf[1] != (uint8_t) STATE_FILE_MAGIC[1] ||
 		buf[2] != (uint8_t) STATE_FILE_MAGIC[2] || buf[3] != (uint8_t) STATE_FILE_MAGIC[3]) {
-		//fprintf(stderr, "FATAL: Wrong state file magic in \"%s\" !\n", path);
-		sprintf(dbgBuf, "FATAL: Wrong state file magic in \"%s\" !\n", path);
-		nocashMessage(dbgBuf);
+		sprintf(debugBuf, "FATAL: Wrong state file magic in \"%s\" !", path);
+		nocashMessage(debugBuf);
 		return;
 	}
-	
-	bufOffset+=4;
-	
-	if (buf[bufOffset] != STATE_FILE_VERSION) {
-		//fprintf(stderr, "FATAL: Unsupported version %u (expected %u) in state file \"%s\" !\n", buf[0], STATE_FILE_VERSION, path);
+
+	result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+	num += readSize;
+	if (buf[0] != STATE_FILE_VERSION) {
+		sprintf(debugBuf, "FATAL: Unsupported version %u (expected %u) in state file \"%s\" !", buf[0], STATE_FILE_VERSION, path);
+		nocashMessage(debugBuf);
 		/* TODO: Handle migration at a point */
-		sprintf(dbgBuf, "FATAL: Unsupported version %u (expected %u) in state file \"%s\" !\n", buf[0], STATE_FILE_VERSION, path);
-		nocashMessage(dbgBuf);
 		return;
 	}
-	bufOffset++;
+
 	
-	*(state->pc) = buf[bufOffset+0] | ((buf[bufOffset+1] & 0x1F) << 8);
-	bufOffset+=2;
-	
-	*(state->x) = buf[bufOffset + 0] | ((buf[bufOffset + 1] & 0xF) << 8);
-	bufOffset+=2;
-	
-	*(state->y) = buf[bufOffset + 0] | ((buf[bufOffset + 1] & 0xF) << 8);
-	bufOffset+=2;
-	
-	*(state->a) = buf[bufOffset + 0] & 0xF;
-	bufOffset++;
-	
-	*(state->b) = buf[bufOffset + 0] & 0xF;
-	bufOffset++;
-	
-	*(state->np) = buf[bufOffset + 0] & 0x1F;
-	bufOffset++;
-	
-	*(state->sp) = buf[bufOffset + 0];
-	bufOffset++;
-	
-	*(state->flags) = buf[bufOffset + 0] & 0xF;
-	bufOffset++;
-	
-	*(state->tick_counter) = buf[bufOffset + 0] | (buf[bufOffset + 1] << 8) | (buf[bufOffset + 2] << 16) | (buf[bufOffset + 3] << 24);
-	bufOffset+=4;
-	
-	*(state->clk_timer_timestamp) = buf[bufOffset + 0] | (buf[bufOffset + 1] << 8) | (buf[bufOffset + 2] << 16) | (buf[bufOffset + 3] << 24);
-	bufOffset+=4;
-	
-	*(state->prog_timer_timestamp) = buf[bufOffset + 0] | (buf[bufOffset + 1] << 8) | (buf[bufOffset + 2] << 16) | (buf[bufOffset + 3] << 24);
-	bufOffset+=4;
-	
-	*(state->prog_timer_enabled) = buf[bufOffset + 0] & 0x1;
-	bufOffset++;
-	
-	*(state->prog_timer_data) = buf[bufOffset + 0];
-	bufOffset++;
-	
-	*(state->prog_timer_rld) = buf[bufOffset + 0];
-	bufOffset++;
-	
-	*(state->call_depth) = buf[bufOffset + 0] | (buf[bufOffset + 1] << 8) | (buf[bufOffset + 2] << 16) | (buf[bufOffset + 3] << 24);
-	bufOffset+=4;
-	
+	result = f_read(&fPagingFD, buf, (int)2, (UINT*)&readSize);
+	num += readSize;
+	*(state->pc) = buf[0] | ((buf[1] & 0x1F) << 8);
+
+	result = f_read(&fPagingFD, buf, (int)2, (UINT*)&readSize);
+	num += readSize;
+	*(state->x) = buf[0] | ((buf[1] & 0xF) << 8);
+
+	result = f_read(&fPagingFD, buf, (int)2, (UINT*)&readSize);
+	num += readSize;
+	*(state->y) = buf[0] | ((buf[1] & 0xF) << 8);
+
+	result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+	num += readSize;
+	*(state->a) = buf[0] & 0xF;
+
+	result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+	num += readSize;
+	*(state->b) = buf[0] & 0xF;
+
+	result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+	num += readSize;
+	*(state->np) = buf[0] & 0x1F;
+
+	result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+	num += readSize;
+	*(state->sp) = buf[0];
+
+	result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+	num += readSize;
+	*(state->flags) = buf[0] & 0xF;
+
+	result = f_read(&fPagingFD, buf, (int)4, (UINT*)&readSize);
+	num += readSize;
+	*(state->tick_counter) = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
+
+	result = f_read(&fPagingFD, buf, (int)4, (UINT*)&readSize);
+	num += readSize;
+	*(state->clk_timer_timestamp) = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
+
+	result = f_read(&fPagingFD, buf, (int)4, (UINT*)&readSize);
+	num += readSize;
+	*(state->prog_timer_timestamp) = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
+
+	result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+	num += readSize;
+	*(state->prog_timer_enabled) = buf[0] & 0x1;
+
+	result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+	num += readSize;
+	*(state->prog_timer_data) = buf[0];
+
+	result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+	num += readSize;
+	*(state->prog_timer_rld) = buf[0];
+
+	result = f_read(&fPagingFD, buf, (int)4, (UINT*)&readSize);
+	num += readSize;
+	*(state->call_depth) = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
+
 	for (i = 0; i < INT_SLOT_NUM; i++) {
-		state->interrupts[i].factor_flag_reg = buf[bufOffset] & 0xF;
-		bufOffset++;
-		
-		state->interrupts[i].mask_reg = buf[bufOffset] & 0xF;
-		bufOffset++;
-		
-		state->interrupts[i].triggered = buf[bufOffset] & 0x1;
-		bufOffset++;
+		result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+		num += readSize;
+		state->interrupts[i].factor_flag_reg = buf[0] & 0xF;
+
+		result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+		num += readSize;
+		state->interrupts[i].mask_reg = buf[0] & 0xF;
+
+		result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+		num += readSize;
+		state->interrupts[i].triggered = buf[0] & 0x1;
 	}
 
 	/* First 640 half bytes correspond to the RAM */
 	for (i = 0; i < MEM_RAM_SIZE; i++) {
-		state->memory[i + MEM_RAM_ADDR] = buf[bufOffset] & 0xF;
-		bufOffset++;
+		result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+		num += readSize;
+		SET_RAM_MEMORY(state->memory, i + MEM_RAM_ADDR, buf[0] & 0xF);
 	}
 
 	/* I/Os are from 0xF00 to 0xF7F */
 	for (i = 0; i < MEM_IO_SIZE; i++) {
-		state->memory[i + MEM_IO_ADDR] = buf[bufOffset] & 0xF;
-		bufOffset++;
+		result = f_read(&fPagingFD, buf, (int)1, (UINT*)&readSize);
+		num += readSize;
+		SET_IO_MEMORY(state->memory, i + MEM_IO_ADDR, buf[0] & 0xF);
 	}
-	
-	buf-=(1024*1024*4); //cache gets in the way
-	coherent_user_range_by_size((uint32)state, sizeof(state_t)); //state_t reloaded? make cache coherent
-	coherent_user_range_by_size((uint32)state->interrupts, sizeof(state->interrupts)); 
-	coherent_user_range_by_size((uint32)state->memory, sizeof(state->memory));
-	
-	
-	TGDSARM9Free(buf);
-	fclose(f);
+
+	f_close(&fPagingFD);
 	tamalib_refresh_hw();
 }

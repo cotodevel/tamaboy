@@ -20,16 +20,12 @@
 #ifndef _STATE_H_
 #define _STATE_H_
 
-#include "typedefsTGDS.h"
-
-#define STATE_TEMPLATE			((char*)"0:/ndstamaboy.sav")
-
+#define STATE_TEMPLATE			"save%u.bin"
 
 #endif /* _STATE_H_ */
 
-
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 extern void state_find_next_name(char *path);

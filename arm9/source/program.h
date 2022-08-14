@@ -1,5 +1,5 @@
 /*
- * TamaLIB - A hardware agnostic Tamagotchi P1 emulation library
+ * TamaTool - A cross-platform Tamagotchi P1 explorer
  *
  * Copyright (C) 2021 Jean-Christophe Rona <jc@rona.fr>
  *
@@ -17,30 +17,25 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#ifndef _HW_H_
-#define _HW_H_
+#ifndef _PROGRAM_H_
+#define _PROGRAM_H_
 
-#include "hal.h"
+#include "hal_types.h"
 
-typedef enum {
-	BTN_STATE_RELEASED = 0,
-	BTN_STATE_PRESSED,
-} btn_state_t;
+#define MAX_SPRITES			256
 
-typedef enum {
-	BTN_LEFT = 0,
-	BTN_MIDDLE,
-	BTN_RIGHT,
-} button_t;
+#endif /* _PROGRAM_H_ */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-bool_t hw_init(void);
-void hw_release(void);
+extern u12_t * program_load(uint32_t *size);
+extern void program_save(char *path, u12_t *program, uint32_t size);
+extern void program_to_header(u12_t *program, uint32_t size);
+extern void program_get_data(u12_t *program, uint32_t size, char *path);
+extern void program_set_data(u12_t *program, uint32_t size, char *path);
 
-void hw_set_lcd_pin(u8_t seg, u8_t com, u8_t val);
-void hw_set_button(button_t btn, btn_state_t state);
-
-void hw_set_buzzer_freq(u4_t freq);
-void hw_enable_buzzer(bool_t en);
-
-#endif /* _HW_H_ */
+#ifdef __cplusplus
+}
+#endif

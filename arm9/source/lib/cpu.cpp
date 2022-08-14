@@ -20,108 +20,7 @@
 #include "cpu.h"
 #include "hw.h"
 #include "hal.h"
-#include "rom.h"
-
-#define TICK_FREQUENCY				32768 // Hz
-
-#define TIMER_1HZ_PERIOD			32768 // in ticks
-#define TIMER_256HZ_PERIOD			128 // in ticks
-
-#define MASK_4B					0xF00
-#define MASK_6B					0xFC0
-#define MASK_7B					0xFE0
-#define MASK_8B					0xFF0
-#define MASK_10B				0xFFC
-#define MASK_12B				0xFFF
-
-#define PCS					(pc & 0xFF)
-#define PCSL					(pc & 0xF)
-#define PCSH					((pc >> 4) & 0xF)
-#define PCP					((pc >> 8) & 0xF)
-#define PCB					((pc >> 12) & 0x1)
-#define TO_PC(bank, page, step)			((step & 0xFF) | ((page & 0xF) << 8) | (bank & 0x1) << 12)
-#define NBP					((np >> 4) & 0x1)
-#define NPP					(np & 0xF)
-#define TO_NP(bank, page)			((page & 0xF) | (bank & 0x1) << 4)
-#define XHL					(x & 0xFF)
-#define XL					(x & 0xF)
-#define XH					((x >> 4) & 0xF)
-#define XP					((x >> 8) & 0xF)
-#define YHL					(y & 0xFF)
-#define YL					(y & 0xF)
-#define YH					((y >> 4) & 0xF)
-#define YP					((y >> 8) & 0xF)
-#define M(n)					get_memory(n)
-#define SET_M(n, v)				set_memory(n, v)
-#define RQ(i)					get_rq(i)
-#define SET_RQ(i, v)				set_rq(i, v)
-#define SPL					(sp & 0xF)
-#define SPH					((sp >> 4) & 0xF)
-
-#define FLAG_C					(0x1 << 0)
-#define FLAG_Z					(0x1 << 1)
-#define FLAG_D					(0x1 << 2)
-#define FLAG_I					(0x1 << 3)
-
-#define C					!!(flags & FLAG_C)
-#define Z					!!(flags & FLAG_Z)
-#define D					!!(flags & FLAG_D)
-#define I					!!(flags & FLAG_I)
-
-#define SET_C()					{flags |= FLAG_C;}
-#define CLEAR_C()				{flags &= ~FLAG_C;}
-#define SET_Z()					{flags |= FLAG_Z;}
-#define CLEAR_Z()				{flags &= ~FLAG_Z;}
-#define SET_D()					{flags |= FLAG_D;}
-#define CLEAR_D()				{flags &= ~FLAG_D;}
-#define SET_I()					{flags |= FLAG_I;}
-#define CLEAR_I()				{flags &= ~FLAG_I;}
-
-#define REG_CLK_INT_FACTOR_FLAGS		0xF00
-#define REG_SW_INT_FACTOR_FLAGS			0xF01
-#define REG_PROG_INT_FACTOR_FLAGS		0xF02
-#define REG_SERIAL_INT_FACTOR_FLAGS		0xF03
-#define REG_K00_K03_INT_FACTOR_FLAGS		0xF04
-#define REG_K10_K13_INT_FACTOR_FLAGS		0xF05
-#define REG_CLOCK_INT_MASKS			0xF10
-#define REG_SW_INT_MASKS			0xF11
-#define REG_PROG_INT_MASKS			0xF12
-#define REG_SERIAL_INT_MASKS			0xF13
-#define REG_K00_K03_INT_MASKS			0xF14
-#define REG_K10_K13_INT_MASKS			0xF15
-#define REG_PROG_TIMER_DATA_L			0xF24
-#define REG_PROG_TIMER_DATA_H			0xF25
-#define REG_PROG_TIMER_RELOAD_DATA_L		0xF26
-#define REG_PROG_TIMER_RELOAD_DATA_H		0xF27
-#define REG_K00_K03_INPUT_PORT			0xF40
-#define REG_K10_K13_INPUT_PORT			0xF42
-#define REG_K40_K43_BZ_OUTPUT_PORT		0xF54
-#define REG_CPU_OSC3_CTRL			0xF70
-#define REG_LCD_CTRL				0xF71
-#define REG_LCD_CONTRAST			0xF72
-#define REG_SVD_CTRL				0xF73
-#define REG_BUZZER_CTRL1			0xF74
-#define REG_BUZZER_CTRL2			0xF75
-#define REG_CLK_WD_TIMER_CTRL			0xF76
-#define REG_SW_TIMER_CTRL			0xF77
-#define REG_PROG_TIMER_CTRL			0xF78
-#define REG_PROG_TIMER_CLK_SEL			0xF79
-
-#define INPUT_PORT_NUM				2
-
-typedef struct {
-	char *log;
-	u12_t code;
-	u12_t mask;
-	u12_t shift_arg0;
-	u12_t mask_arg0;			// != 0 only if there are two arguments
-	u8_t cycles;
-	void (*cb)(u8_t arg0, u8_t arg1);
-} op_t;
-
-typedef struct {
-	u4_t states;
-} input_port_t;
+#include "tamalib.h"
 
 /* Registers */
 static u13_t pc, next_pc;
@@ -133,15 +32,12 @@ static u8_t sp;
 /* Flags */
 static u4_t flags;
 
-#ifdef ARM9
-__attribute__((section(".dtcm")))
-#endif
-u4_t tama_io_memory[MEMORY_SIZE];
-
-static input_port_t inputs[INPUT_PORT_NUM] = {{0}};
+u12_t *g_program = NULL;
+MEM_BUFFER_TYPE memory[MEM_BUFFER_SIZE];
+input_port_t inputs[INPUT_PORT_NUM] = {{0}};
 
 /* Interrupts (in priority order) */
-static interrupt_t interrupts[INT_SLOT_NUM] = {
+interrupt_t interrupts[INT_SLOT_NUM] = {
 	{0x0, 0x0, 0, 0x0C}, // Prog timer
 	{0x0, 0x0, 0, 0x0A}, // Serial interface
 	{0x0, 0x0, 0, 0x08}, // Input (K10-K13)
@@ -149,8 +45,6 @@ static interrupt_t interrupts[INT_SLOT_NUM] = {
 	{0x0, 0x0, 0, 0x04}, // Stopwatch timer
 	{0x0, 0x0, 0, 0x02}, // Clock timer
 };
-
-static breakpoint_t *g_breakpoints = NULL;
 
 static u32_t call_depth = 0;
 
@@ -161,42 +55,21 @@ static u8_t prog_timer_data = 0;
 static u8_t prog_timer_rld = 0;
 
 static u32_t tick_counter = 0;
-static u32_t ts_freq;
 static u8_t speed_ratio = 1;
 static timestamp_t ref_ts;
 
-static state_t cpu_state = {
-	.pc = &pc,
-	.x = &x,
-	.y = &y,
-	.a = &a,
-	.b = &b,
-	.np = &np,
-	.sp = &sp,
-	.flags = &flags,
-
-	.tick_counter = &tick_counter,
-	.clk_timer_timestamp = &clk_timer_timestamp,
-	.prog_timer_timestamp = &prog_timer_timestamp,
-	.prog_timer_enabled = &prog_timer_enabled,
-	.prog_timer_data = &prog_timer_data,
-	.prog_timer_rld = &prog_timer_rld,
-
-	.call_depth = &call_depth,
-
-	.interrupts = interrupts,
-
-	.memory = tama_io_memory,
-};
+state_t cpu_state;
 
 
 void cpu_add_bp(breakpoint_t **list, u13_t addr)
 {
 	breakpoint_t *bp;
 
-	bp = (breakpoint_t *) g_hal->malloc(sizeof(breakpoint_t));
+	bp = (breakpoint_t *) hal.malloc(sizeof(breakpoint_t));
 	if (!bp) {
-		g_hal->log(LOG_ERROR, "Cannot allocate memory for breakpoint 0x%04X!\n", addr);
+		#ifdef LOG_MSGS
+		hal.log(LOG_ERROR, "Cannot allocate memory for breakpoint 0x%04X!", addr);
+		#endif
 		return;
 	}
 
@@ -218,7 +91,7 @@ void cpu_free_bp(breakpoint_t **list)
 
 	while (bp != NULL) {
 		tmp = bp->next;
-		g_hal->free(bp);
+		hal.free(bp);
 		bp = tmp;
 	}
 
@@ -272,7 +145,7 @@ void cpu_set_input_pin(pin_t pin, pin_state_t state)
 
 void cpu_sync_ref_timestamp(void)
 {
-	ref_ts = g_hal->get_timestamp();
+	ref_ts = hal.get_timestamp();
 }
 
 static u4_t get_io(u12_t n)
@@ -366,15 +239,15 @@ static u4_t get_io(u12_t n)
 
 		case REG_K40_K43_BZ_OUTPUT_PORT:
 			/* Output port (R40-R43) */
-			return tama_io_memory[n];
+			return GET_IO_MEMORY(memory, n);
 
 		case REG_CPU_OSC3_CTRL:
 			/* CPU/OSC3 clocks switch, CPU voltage switch */
-			return tama_io_memory[n];
+			return GET_IO_MEMORY(memory, n);
 
 		case REG_LCD_CTRL:
 			/* LCD control */
-			return tama_io_memory[n];
+			return GET_IO_MEMORY(memory, n);
 
 		case REG_LCD_CONTRAST:
 			/* LCD contrast */
@@ -382,15 +255,15 @@ static u4_t get_io(u12_t n)
 
 		case REG_SVD_CTRL:
 			/* SVD */
-			return tama_io_memory[n] & 0x7; // Voltage always OK
+			return GET_IO_MEMORY(memory, n) & 0x7; // Voltage always OK
 
 		case REG_BUZZER_CTRL1:
 			/* Buzzer config 1 */
-			return tama_io_memory[n];
+			return GET_IO_MEMORY(memory, n);
 
 		case REG_BUZZER_CTRL2:
 			/* Buzzer config 2 */
-			return tama_io_memory[n] & 0x3; // Buzzer ready
+			return GET_IO_MEMORY(memory, n) & 0x3; // Buzzer ready
 
 		case REG_CLK_WD_TIMER_CTRL:
 			/* Clock/Watchdog timer reset */
@@ -408,9 +281,12 @@ static u4_t get_io(u12_t n)
 			/* Prog timer clock selection */
 			break;
 
-		default:
-			break;
-			//g_hal->log(LOG_ERROR,   "Read from unimplemented I/O 0x%03X - PC = 0x%04X\n", n, pc);
+		default:{
+			#ifdef LOG_MSGS
+			hal.log(LOG_ERROR,   "Read from unimplemented I/O 0x%03X - PC = 0x%04X\n", n, pc);
+			#endif
+		}
+		break;
 	}
 
 	return 0;
@@ -470,11 +346,14 @@ static void set_io(u12_t n, u4_t v)
 			/* Write not allowed */
 			break;
 
-		case REG_K40_K43_BZ_OUTPUT_PORT:
+		case REG_K40_K43_BZ_OUTPUT_PORT:{
 			/* Output port (R40-R43) */
-			//g_hal->log(LOG_INFO, "Output/Buzzer: 0x%X\n", v);
+			#ifdef LOG_MSGS
+			hal.log(LOG_INFO, "Output/Buzzer: 0x%X\n", v);
+			#endif
 			hw_enable_buzzer(!(v & 0x8));
-			break;
+		}
+		break;
 
 		case REG_CPU_OSC3_CTRL:
 			/* CPU/OSC3 clocks switch, CPU voltage switch */
@@ -531,9 +410,12 @@ static void set_io(u12_t n, u4_t v)
 			/* Assume 256Hz, output disabled */
 			break;
 
-		default:
-			break;
-			//g_hal->log(LOG_ERROR,   "Write 0x%X to unimplemented I/O 0x%03X - PC = 0x%04X\n", v, n, pc);
+		default:{
+			#ifdef LOG_MSGS
+			hal.log(LOG_ERROR,   "Write 0x%X to unimplemented I/O 0x%03X - PC = 0x%04X\n", v, n, pc);
+			#endif
+		}
+		break;
 	}
 }
 
@@ -556,59 +438,86 @@ static u4_t get_memory(u12_t n)
 
 	if (n < MEM_RAM_SIZE) {
 		/* RAM */
-		//g_hal->log(LOG_MEMORY, "RAM              - ");
-		res = tama_io_memory[n];
+		#ifdef LOG_MSGS
+		hal.log(LOG_MEMORY, "RAM              - ");
+		#endif
+		res = GET_RAM_MEMORY(memory, n);
 	} else if (n >= MEM_DISPLAY1_ADDR && n < (MEM_DISPLAY1_ADDR + MEM_DISPLAY1_SIZE)) {
 		/* Display Memory 1 */
-		//g_hal->log(LOG_MEMORY, "Display Memory 1 - ");
-		res = tama_io_memory[n];
+		#ifdef LOG_MSGS
+		hal.log(LOG_MEMORY, "Display Memory 1 - ");
+		#endif
+		res = GET_DISP1_MEMORY(memory, n);
 	} else if (n >= MEM_DISPLAY2_ADDR && n < (MEM_DISPLAY2_ADDR + MEM_DISPLAY2_SIZE)) {
 		/* Display Memory 2 */
-		//g_hal->log(LOG_MEMORY, "Display Memory 2 - ");
-		res = tama_io_memory[n];
+		#ifdef LOG_MSGS
+		hal.log(LOG_MEMORY, "Display Memory 2 - ");
+		#endif
+		res = GET_DISP2_MEMORY(memory, n);
 	} else if (n >= MEM_IO_ADDR && n < (MEM_IO_ADDR + MEM_IO_SIZE)) {
 		/* I/O Memory */
-		//g_hal->log(LOG_MEMORY, "I/O              - ");
+		#ifdef LOG_MSGS
+		hal.log(LOG_MEMORY, "I/O              - ");
+		#endif
 		res = get_io(n);
 	} else {
-		//g_hal->log(LOG_ERROR,   "Read from invalid memory address 0x%03X - PC = 0x%04X\n", n, pc);
+		#ifdef LOG_MSGS
+		hal.log(LOG_ERROR,   "Read from invalid memory address 0x%03X - PC = 0x%04X\n", n, pc);
+		#endif
 		return 0;
 	}
-
-	//g_hal->log(LOG_MEMORY, "Read  0x%X - Address 0x%03X - PC = 0x%04X\n", res, n, pc);
+	
+	#ifdef LOG_MSGS
+	hal.log(LOG_MEMORY, "Read  0x%X - Address 0x%03X - PC = 0x%04X\n", res, n, pc);
+	#endif
+	
 	return res;
 }
 
 static void set_memory(u12_t n, u4_t v)
 {
+	/* Cache any data written to a valid address, and process it */
 	if (n < MEM_RAM_SIZE) {
 		/* RAM */
-		//g_hal->log(LOG_MEMORY, "RAM              - ");
+		SET_RAM_MEMORY(memory, n, v);
+		#ifdef LOG_MSGS
+		hal.log(LOG_MEMORY, "RAM              - ");
+		#endif
 	} else if (n >= MEM_DISPLAY1_ADDR && n < (MEM_DISPLAY1_ADDR + MEM_DISPLAY1_SIZE)) {
 		/* Display Memory 1 */
+		SET_DISP1_MEMORY(memory, n, v);
 		set_lcd(n, v);
-		//g_hal->log(LOG_MEMORY, "Display Memory 1 - ");
+		#ifdef LOG_MSGS
+		hal.log(LOG_MEMORY, "Display Memory 1 - ");
+		#endif
 	} else if (n >= MEM_DISPLAY2_ADDR && n < (MEM_DISPLAY2_ADDR + MEM_DISPLAY2_SIZE)) {
 		/* Display Memory 2 */
+		SET_DISP2_MEMORY(memory, n, v);
 		set_lcd(n, v);
-		//g_hal->log(LOG_MEMORY, "Display Memory 2 - ");
+		#ifdef LOG_MSGS
+		hal.log(LOG_MEMORY, "Display Memory 2 - ");
+		#endif
 	} else if (n >= MEM_IO_ADDR && n < (MEM_IO_ADDR + MEM_IO_SIZE)) {
 		/* I/O Memory */
+		SET_IO_MEMORY(memory, n, v);
 		set_io(n, v);
-		//g_hal->log(LOG_MEMORY, "I/O              - ");
+		#ifdef LOG_MSGS
+		hal.log(LOG_MEMORY, "I/O              - ");
+		#endif
 	} else {
-		//g_hal->log(LOG_ERROR,   "Write 0x%X to invalid memory address 0x%03X - PC = 0x%04X\n", v, n, pc);
+		#ifdef LOG_MSGS
+		hal.log(LOG_ERROR,   "Write 0x%X to invalid memory address 0x%03X - PC = 0x%04X\n", v, n, pc);
+		#endif
 		return;
 	}
-
-	/* Cache any data written to a valid address */
-	tama_io_memory[n] = v;
-
-	//g_hal->log(LOG_MEMORY, "Write 0x%X - Address 0x%03X - PC = 0x%04X\n", v, n, pc);
+	#ifdef LOG_MSGS
+	hal.log(LOG_MEMORY, "Write 0x%X - Address 0x%03X - PC = 0x%04X\n", v, n, pc);
+	#endif
 }
 
-void cpu_refresh_hw(void)
-{
+void cpu_refresh_hw(void){
+	int i = 0;
+	u12_t n = 0;
 	static const struct range {
 		u12_t addr;
 		u12_t size;
@@ -620,11 +529,10 @@ void cpu_refresh_hw(void)
 
 		{ 0, 0 }, // end of list
 	};
-	int i = 0;
+
 	for (i = 0; refresh_locs[i].size != 0; i++) {
-		u12_t n = 0;
 		for (n = refresh_locs[i].addr; n < (refresh_locs[i].addr + refresh_locs[i].size); n++) {
-			set_memory(n, tama_io_memory[n]);
+			set_memory(n, GET_MEMORY(memory, n));
 		}
 	}
 }
@@ -756,7 +664,7 @@ static void op_retd_cb(u8_t arg0, u8_t arg1)
 	sp = (sp + 3) & 0xFF;
 	SET_M(x, arg0 & 0xF);
 	SET_M(x + 1, (arg0 >> 4) & 0xF);
-	x = (x + 2) & 0xFFF;
+	x = ((x + 2) & 0xFF) | (XP << 8);
 	call_depth--;
 }
 
@@ -770,17 +678,17 @@ static void op_nop7_cb(u8_t arg0, u8_t arg1)
 
 static void op_halt_cb(u8_t arg0, u8_t arg1)
 {
-	//g_hal->halt();
+	hal.halt();
 }
 
 static void op_inc_x_cb(u8_t arg0, u8_t arg1)
 {
-	x = (x + 1) & 0xFFF;
+	x = ((x + 1) & 0xFF) | (XP << 8);
 }
 
 static void op_inc_y_cb(u8_t arg0, u8_t arg1)
 {
-	y = (y + 1) & 0xFFF;
+	y = ((y + 1) & 0xFF) | (YP << 8);
 }
 
 static void op_ld_x_cb(u8_t arg0, u8_t arg1)
@@ -950,32 +858,32 @@ static void op_ld_mn_b_cb(u8_t arg0, u8_t arg1)
 static void op_ldpx_mx_cb(u8_t arg0, u8_t arg1)
 {
 	SET_M(x, arg0);
-	x = (x + 1) & 0xFFF;
+	x = ((x + 1) & 0xFF) | (XP << 8);
 }
 
 static void op_ldpx_r_cb(u8_t arg0, u8_t arg1)
 {
 	SET_RQ(arg0, RQ(arg1));
-	x = (x + 1) & 0xFFF;
+	x = ((x + 1) & 0xFF) | (XP << 8);
 }
 
 static void op_ldpy_my_cb(u8_t arg0, u8_t arg1)
 {
 	SET_M(y, arg0);
-	y = (y + 1) & 0xFFF;
+	y = ((y + 1) & 0xFF) | (YP << 8);
 }
 
 static void op_ldpy_r_cb(u8_t arg0, u8_t arg1)
 {
 	SET_RQ(arg0, RQ(arg1));
-	y = (y + 1) & 0xFFF;
+	y = ((y + 1) & 0xFF) | (YP << 8);
 }
 
 static void op_lbpx_cb(u8_t arg0, u8_t arg1)
 {
 	SET_M(x, arg0 & 0xF);
 	SET_M(x + 1, (arg0 >> 4) & 0xF);
-	x = (x + 2) & 0xFFF;
+	x = ((x + 2) & 0xFF) | (XP << 8);
 }
 
 static void op_set_cb(u8_t arg0, u8_t arg1)
@@ -1404,7 +1312,7 @@ static void op_acpx_cb(u8_t arg0, u8_t arg1)
 		if (tmp >> 4) { SET_C(); } else { CLEAR_C(); }
 	}
 	if (!M(x)) { SET_Z(); } else { CLEAR_Z(); }
-	x = (x + 1) & 0xFFF;
+	x = ((x + 1) & 0xFF) | (XP << 8);
 }
 
 static void op_acpy_cb(u8_t arg0, u8_t arg1)
@@ -1425,7 +1333,7 @@ static void op_acpy_cb(u8_t arg0, u8_t arg1)
 		if (tmp >> 4) { SET_C(); } else { CLEAR_C(); }
 	}
 	if (!M(y)) { SET_Z(); } else { CLEAR_Z(); }
-	y = (y + 1) & 0xFFF;
+	y = ((y + 1) & 0xFF) | (YP << 8);
 }
 
 static void op_scpx_cb(u8_t arg0, u8_t arg1)
@@ -1444,7 +1352,7 @@ static void op_scpx_cb(u8_t arg0, u8_t arg1)
 	}
 	if (tmp >> 4) { SET_C(); } else { CLEAR_C(); }
 	if (!M(x)) { SET_Z(); } else { CLEAR_Z(); }
-	x = (x + 1) & 0xFFF;
+	x = ((x + 1) & 0xFF) | (XP << 8);
 }
 
 static void op_scpy_cb(u8_t arg0, u8_t arg1)
@@ -1463,7 +1371,7 @@ static void op_scpy_cb(u8_t arg0, u8_t arg1)
 	}
 	if (tmp >> 4) { SET_C(); } else { CLEAR_C(); }
 	if (!M(y)) { SET_Z(); } else { CLEAR_Z(); }
-	y = (y + 1) & 0xFFF;
+	y = ((y + 1) & 0xFF) | (YP << 8);
 }
 
 static void op_not_cb(u8_t arg0, u8_t arg1)
@@ -1593,11 +1501,11 @@ static timestamp_t wait_for_cycles(timestamp_t since, u8_t cycles) {
 
 	if (speed_ratio == 0) {
 		/* Emulation will be as fast as possible */
-		return g_hal->get_timestamp();
+		return hal.get_timestamp();
 	}
 
 	deadline = since + (cycles * ts_freq)/(TICK_FREQUENCY * speed_ratio);
-	g_hal->sleep_until(deadline);
+	hal.sleep_until(deadline);
 
 	return deadline;
 }
@@ -1609,7 +1517,7 @@ static void process_interrupts(void)
 	/* Process interrupts in priority order */
 	for (i = 0; i < INT_SLOT_NUM; i++) {
 		if (interrupts[i].triggered) {
-			//printf("IT %u !\n", i);
+			//printf("IT %u !", i);
 			SET_M(sp - 1, PCP);
 			SET_M(sp - 2, PCSH);
 			SET_M(sp - 3, PCSL);
@@ -1627,43 +1535,72 @@ static void process_interrupts(void)
 
 static void print_state(u8_t op_num, u12_t op, u13_t addr)
 {
-	/*
 	u8_t i;
 
-	if (!g_hal->is_log_enabled(LOG_CPU)) {
+	if (!hal.is_log_enabled(LOG_CPU)) {
 		return;
 	}
-
-	g_hal->log(LOG_CPU, "0x%04X: ", addr);
-
+	#ifdef LOG_MSGS
+	hal.log(LOG_CPU, "0x%04X: ", addr);
+	#endif
 	for (i = 0; i < call_depth; i++) {
-		g_hal->log(LOG_CPU, "  ");
+		#ifdef LOG_MSGS
+		hal.log(LOG_CPU, "  ");
+		#endif
 	}
 
 	if (ops[op_num].mask_arg0 != 0) {
-		// Two arguments 
-		g_hal->log(LOG_CPU, ops[op_num].log, (op & ops[op_num].mask_arg0) >> ops[op_num].shift_arg0, op & ~(ops[op_num].mask | ops[op_num].mask_arg0));
+		/* Two arguments */
+		#ifdef LOG_MSGS
+		hal.log(LOG_CPU, ops[op_num].log, (op & ops[op_num].mask_arg0) >> ops[op_num].shift_arg0, op & ~(ops[op_num].mask | ops[op_num].mask_arg0));
+		#endif
 	} else {
-		// One argument 
-		g_hal->log(LOG_CPU, ops[op_num].log, (op & ~ops[op_num].mask) >> ops[op_num].shift_arg0);
+		/* One argument */
+		#ifdef LOG_MSGS
+		hal.log(LOG_CPU, ops[op_num].log, (op & ~ops[op_num].mask) >> ops[op_num].shift_arg0);
+		#endif
 	}
 
 	if (call_depth < 10) {
 		for (i = 0; i < (10 - call_depth); i++) {
-			g_hal->log(LOG_CPU, "  ");
+			#ifdef LOG_MSGS
+			hal.log(LOG_CPU, "  ");
+			#endif
 		}
 	}
-
-	g_hal->log(LOG_CPU, " ; 0x%03X - ", op);
+	#ifdef LOG_MSGS
+	hal.log(LOG_CPU, " ; 0x%03X - ", op);
+	#endif
 	for (i = 0; i < 12; i++) {
-		g_hal->log(LOG_CPU, "%s", ((op >> (11 - i)) & 0x1) ? "1" : "0");
+		#ifdef LOG_MSGS
+		hal.log(LOG_CPU, "%s", ((op >> (11 - i)) & 0x1) ? "1" : "0");
+		#endif
 	}
-	g_hal->log(LOG_CPU, " - PC = 0x%04X, SP = 0x%02X, NP = 0x%02X, X = 0x%03X, Y = 0x%03X, A = 0x%X, B = 0x%X, F = 0x%X\n", pc, sp, np, x, y, a, b, flags);
-	*/
+	#ifdef LOG_MSGS
+	hal.log(LOG_CPU, " - PC = 0x%04X, SP = 0x%02X, NP = 0x%02X, X = 0x%03X, Y = 0x%03X, A = 0x%X, B = 0x%X, F = 0x%X\n", pc, sp, np, x, y, a, b, flags);
+	#endif
 }
 
 void cpu_reset(void)
 {
+	cpu_state.pc = &pc;
+	cpu_state.x = &x;
+	cpu_state.y = &y;
+	cpu_state.a = &a;
+	cpu_state.b = &b;
+	cpu_state.np = &np;
+	cpu_state.sp = &sp;
+	cpu_state.flags = &flags;
+	cpu_state.tick_counter = &tick_counter;
+	cpu_state.clk_timer_timestamp = &clk_timer_timestamp;
+	cpu_state.prog_timer_timestamp = &prog_timer_timestamp;
+	cpu_state.prog_timer_enabled = &prog_timer_enabled;
+	cpu_state.prog_timer_data = &prog_timer_data;
+	cpu_state.prog_timer_rld = &prog_timer_rld;
+	cpu_state.call_depth = &call_depth;
+	cpu_state.interrupts = interrupts;
+	cpu_state.memory = memory;
+
 	u13_t i;
 
 	/* Registers and variables init */
@@ -1677,12 +1614,12 @@ void cpu_reset(void)
 	flags = 0;
 
 	/* Init RAM to zeros */
-	for (i = 0; i < MEMORY_SIZE; i++) {
-		tama_io_memory[i] = 0;
+	for (i = 0; i < MEM_BUFFER_SIZE; i++) {
+		memory[i] = 0;
 	}
 
-	tama_io_memory[REG_K40_K43_BZ_OUTPUT_PORT] = 0xF; // Output port (R40-R43)
-	tama_io_memory[REG_LCD_CTRL] = 0x8; // LCD control
+	SET_IO_MEMORY(memory, REG_K40_K43_BZ_OUTPUT_PORT, 0xF); // Output port (R40-R43)
+	SET_IO_MEMORY(memory, REG_LCD_CTRL, 0x8); // LCD control
 	/* TODO: Input relation register */
 
 	cpu_sync_ref_timestamp();
@@ -1690,6 +1627,7 @@ void cpu_reset(void)
 
 bool_t cpu_init(const u12_t *program, breakpoint_t *breakpoints, u32_t freq)
 {
+	g_program = (u12_t *)program;
 	g_breakpoints = breakpoints;
 	ts_freq = freq;
 
@@ -1702,9 +1640,6 @@ void cpu_release(void)
 {
 }
 
-#ifdef ARM9
-__attribute__((section(".itcm")))
-#endif
 int cpu_step(void)
 {
 	u12_t op;
@@ -1722,14 +1657,16 @@ int cpu_step(void)
 	}
 
 	if (ops[i].log == NULL) {
-		//g_hal->log(LOG_ERROR, "Unknown op-code 0x%X (pc = 0x%04X)\n", op, pc);
+		#ifdef LOG_MSGS
+		hal.log(LOG_ERROR, "Unknown op-code 0x%X (pc = 0x%04X)", op, pc);
+		#endif
 		return 1;
 	}
 
 	next_pc = (pc + 1) & 0x1FFF;
 
 	/* Display the operation along with the current state of the processor */
-	//print_state(i, op, pc);
+	print_state(i, op, pc);
 
 	/* Match the speed of the real processor
 	 * NOTE: For better accuracy, the final wait should happen here, however

@@ -49,7 +49,7 @@ USA
 #include "wifi_arm9.h"
 #include "dswnifi_lib.h"
 #include "cpu.h"
-#include "tama_process.h"
+#include "tamalib.h"
 
 #endif
 

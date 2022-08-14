@@ -29,7 +29,7 @@ USA
 #include "math.h"
 #include "imagepcx.h"
 #include "dmaTGDS.h"
-#include "tama_process.h"
+#include "tamalib.h"
 #include "hal.h"
 
 //User Handler Definitions

@@ -1,3 +1,4 @@
+#ifdef WIN32
 /*
  * TamaTool - A cross-platform Tamagotchi P1 explorer
  *
@@ -17,18 +18,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#ifndef _HAL_TYPES_H_
-#define _HAL_TYPES_H_
+#ifndef _IMAGE_H_
+#define _IMAGE_H_
 
-#include <stdint.h>
+#include <png.h>
 
-typedef uint8_t bool_t;
-typedef uint8_t u4_t;
-typedef uint8_t u5_t;
-typedef uint8_t u8_t;
-typedef uint16_t u12_t;
-typedef uint16_t u13_t;
-typedef uint32_t u32_t;
-typedef uint32_t timestamp_t; // WARNING: Must be an unsigned type to properly handle wrapping (u32 wraps in around 1h11m when expressed in us)
+typedef struct {
+	int width;
+	int height;
+	int stride;
+	png_byte color_type;
+	png_byte bit_depth;
 
-#endif /* _HAL_TYPES_H_ */
+	png_bytepp row_pointers;
+} image_t;
+
+
+void image_alloc(image_t *image);
+void image_free(image_t *image);
+void image_read_file(char* file_name, image_t *image);
+void image_write_file(char* file_name, image_t *image);
+
+#endif /* _IMAGE_H_ */
+#endif

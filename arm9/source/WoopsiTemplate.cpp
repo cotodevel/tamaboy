@@ -23,11 +23,15 @@
 #include "imagepcx.h"
 #include "dswnifi_lib.h"
 #include "tamalib.h"
-#include "tama_process.h"
 #include "hal.h"
 #include "hw.h"
 #include "rom.h"
 #include "state.h"
+#include "timerTGDS.h"
+#include "cpu.h"
+#include "program.h"
+#include "mem_edit.h"
+#include "debugNocash.h"
 
 #if (defined(__GNUC__) && !defined(__clang__))
 __attribute__((optimize("O0")))
@@ -108,16 +112,9 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
 	REG_BG3Y = regBG3Y;
 	
 	disableWaitForVblankC();
-    tamalib_register_hal(&tama_hal);
-    tamalib_init(g_program, NULL, 1000);
-    cpu_set_speed(0);
-    cycle_count = cpu_get_state()->tick_counter;
     
-	//restore last state
-	
-	//Load state now.
+	//restore last state now.
 	reEnableVblank = false;
-	state_load(STATE_TEMPLATE);
 	Rect rect;
 
 	/** SuperBitmap preparation **/
@@ -164,15 +161,179 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
 	
 	_MultiLineTextBoxLogger = NULL;	//destroyable TextBox
 	
+	//Tama process init --
+	
+	char rom_path[256] = ROM_PATH;
+	char sprites_path[256] = {0};
+	bool_t gen_header = 0;
+	bool_t extract_sprites = 0;
+	bool_t modify_sprites = 0;
+
+	//startTimerCounter(tUnitsMilliseconds, 1000); //tUnitsMilliseconds equals 1 millisecond/unit. A single unit (1) is the default value for normal timer count-up scenarios. 
+	tamalib_register_hal(&hal);
+
+	/*
+	for (;;) {
+		int index;
+		int c;
+
+		c = getopt_long(argc, argv, short_options, long_options, &index);
+
+		if (-1 == c)
+			break;
+
+		switch (c) {
+			case 0:	// getopt_long() flag 
+				break;
+
+			case 'r':
+				strncpy(rom_path, optarg, 256);
+				break;
+
+			case 'E':
+				extract_sprites = 1;
+				strncpy(sprites_path, optarg, 256);
+				break;
+
+			case 'M':
+				modify_sprites = 1;
+				strncpy(sprites_path, optarg, 256);
+				break;
+
+			case 'H':
+				gen_header = 1;
+				break;
+
+			case 'l':
+				strncpy(save_path, optarg, 256);
+				break;
+
+			case 's':
+				tamalib_set_exec_mode(EXEC_MODE_STEP);
+				break;
+
+			case 'b':
+				tamalib_add_bp(&g_breakpoints, strtoul(optarg, NULL, 0));
+				break;
+
+			case 'm':
+				log_levels |= LOG_MEMORY;
+				break;
+
+#if !defined(__WIN32__)
+			case 'e':
+				memory_editor_enable = 1;
+				break;
+#endif
+
+			case 'c':
+				log_levels |= LOG_CPU;
+				break;
+
+			case 'v':
+				log_levels |= LOG_MEMORY | LOG_CPU;
+				break;
+
+			case 'h':
+				usage(stdout, argc, argv);
+				exit(EXIT_SUCCESS);
+
+			default:
+				usage(stderr, argc, argv);
+				exit(EXIT_FAILURE);
+		}
+	}
+	*/
+
+	g_program = program_load(&g_program_size);
+	if (g_program == NULL) {
+		hal_log(LOG_ERROR, "FATAL: Error while loading ROM %s !", rom_path);
+		tamalib_free_bp(&g_breakpoints);
+		nocashMessage("FATAL: Error while loading ROM");
+	}
+	else{
+		nocashMessage("Load ROM OK\n");
+	}
+
+	if (gen_header || extract_sprites || modify_sprites) {
+		nocashMessage("ROM manipulation only \n");
+		// ROM manipulation only (no emulation) 
+		if (gen_header) {
+			program_to_header(g_program, g_program_size);
+		} else if (extract_sprites) {
+			program_get_data(g_program, g_program_size, sprites_path);
+		} else if (modify_sprites) {
+			program_set_data(g_program, g_program_size, sprites_path);
+			program_save(rom_path, g_program, g_program_size);
+		}
+
+		TGDSARM9Free(g_program);
+		tamalib_free_bp(&g_breakpoints);
+	}
+	else{
+		nocashMessage("ROM running normally.\n");
+	}
+
+	compute_layout();
+	
+	#ifdef WIN32
+	if (sdl_init()) {
+		hal_log(LOG_ERROR, "FATAL: Error while initializing application !");
+		TGDSARM9Free(g_program);
+		tamalib_free_bp(&g_breakpoints);
+		return -1;
+	}
+	#endif
+	
+	if (tamalib_init(g_program, NULL, 1000)) {
+		hal_log(LOG_ERROR, "FATAL: Error while initializing tamalib !");
+		nocashMessage("FATAL: Error while initializing tamalib !");
+		#ifdef WIN32
+		sdl_release();
+		#endif
+		TGDSARM9Free(g_program);
+		tamalib_free_bp(&g_breakpoints);
+	}
+	else{
+		nocashMessage("tamalib init OK !");
+	}
+    cpu_set_speed(0);
+    cycle_count = (u32*)cpu_state.tick_counter;
+
+	state_load(SAVE_PATH);
+	
+	/*
+	if (memory_editor_enable) {
+		// Logs are not compatible with the memory editor 
+		log_levels = LOG_ERROR;
+		mem_edit_configure_terminal();
+	}*/
+
+	//Tama process init end--
+	
 	enableDrawing();	// Ensure Woopsi can now draw itself
 	redraw();			// Draw initial state
 	
 }
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 void WoopsiTemplate::shutdown()   {
 	Woopsi::shutdown();
 }
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 void WoopsiTemplate::waitForAOrTouchScreenButtonMessage(MultiLineTextBox* thisLineTextBox, const WoopsiString& thisText)   {
 	thisLineTextBox->appendText(thisText);
 	scanKeys();
@@ -185,6 +346,13 @@ void WoopsiTemplate::waitForAOrTouchScreenButtonMessage(MultiLineTextBox* thisLi
 	}
 }
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 void WoopsiTemplate::handleValueChangeEvent(const GadgetEventArgs& e)   {
 
 	// Did a gadget fire this event?
@@ -220,6 +388,13 @@ void WoopsiTemplate::handleValueChangeEvent(const GadgetEventArgs& e)   {
 	}
 }
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 void WoopsiTemplate::handleLidClosed() {
 	// Lid has just been closed
 	_lidClosed = true;
@@ -232,6 +407,13 @@ void WoopsiTemplate::handleLidClosed() {
 	}
 }
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 void WoopsiTemplate::handleLidOpen() {
 	// Lid has just been opened
 	_lidClosed = false;
@@ -244,6 +426,13 @@ void WoopsiTemplate::handleLidOpen() {
 	}
 }
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 void printMessage(char * msg){
 	//Destroyable Textbox implementation init
 	Rect rect;
@@ -266,6 +455,13 @@ void printMessage(char * msg){
 	//Destroyable Textbox implementation end
 }
 
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 void WoopsiTemplate::handleClickEvent(const GadgetEventArgs& e)   {
 	switch (e.getSource()->getRefcon()) {
 		//Tamagotchi Left Button Event
@@ -318,7 +514,7 @@ void WoopsiTemplate::handleClickEvent(const GadgetEventArgs& e)   {
 			
 			
 			if(pressedB == true){
-				state_save(STATE_TEMPLATE);
+				state_save(SAVE_PATH);
 				printMessage("Tamagotchi has been saved correctly. It's safe to turn off unit now.");
 				shutdownNDSHardware();
 				while(1==1){
@@ -343,7 +539,5 @@ void Woopsi::ApplicationMainLoop()  {
 	//Earlier.. main from Woopsi SDK.
 	
 	//Handle TGDS stuff...
-	
-	//tama process
 	tama_process();
 }

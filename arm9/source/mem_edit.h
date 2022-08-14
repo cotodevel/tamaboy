@@ -17,18 +17,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-#ifndef _HAL_TYPES_H_
-#define _HAL_TYPES_H_
+#ifndef _MEM_EDIT_H_
+#define _MEM_EDIT_H_
 
-#include <stdint.h>
+#endif /* _MEM_EDIT_H_ */
 
-typedef uint8_t bool_t;
-typedef uint8_t u4_t;
-typedef uint8_t u5_t;
-typedef uint8_t u8_t;
-typedef uint16_t u12_t;
-typedef uint16_t u13_t;
-typedef uint32_t u32_t;
-typedef uint32_t timestamp_t; // WARNING: Must be an unsigned type to properly handle wrapping (u32 wraps in around 1h11m when expressed in us)
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif /* _HAL_TYPES_H_ */
+extern void mem_edit_reset_terminal(void);
+extern void mem_edit_configure_terminal(void);
+extern void mem_edit_update(void);
+
+#ifdef __cplusplus
+}
+#endif
