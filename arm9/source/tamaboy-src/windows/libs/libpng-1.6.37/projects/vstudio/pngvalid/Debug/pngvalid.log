@@ -1,0 +1,61 @@
+﻿Build started 07/08/2022 0:54:56.
+     1>Project "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\pngvalid\pngvalid.vcxproj" on node 2 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I..\zlib /I..\..\..\scripts /Zi /nologo /Wall /WX /Od /Oi /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D PNG_USE_DLL /D _UNICODE /D UNICODE /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy- /fp:precise /fp:except- /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /FR"Debug\\" /Gd /TC /wd4255 /wd4668 /wd4710 /wd4711 /wd4746 /wd4820 /wd4996 /analyze- /errorReport:prompt ..\..\..\contrib\libtests\pngvalid.c
+         pngvalid.c
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngvalid.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\\" libpng16.lib zlib.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngvalid.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngvalid.lib" /MACHINE:X86 /SAFESEH Debug\pngvalid.obj
+         pngvalid.vcxproj -> C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngvalid.exe
+       BscMake:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\bscmake.exe /nologo /o"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngvalid.bsc" Debug\pngvalid.sbr
+       CustomBuildStep:
+         "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngvalid.exe" --touch "Debug\pngvalid.out"
+         :VCEnd
+         Gamma correction error summary
+         
+         The printed value is the maximum error in the pixel values
+         calculated by the libpng gamma correction code.  The error
+         is calculated as the difference between the output pixel
+         value (always an integer) and the ideal value from the
+         libpng specification (typically not an integer).
+         
+         Expect this value to be less than .5 for 8 bit formats,
+         less than 1 for formats with fewer than 8 bits and a small
+         number (typically less than 5) for the 16 bit formats.
+         For performance reasons the value for 16 bit formats
+         increases when the image file includes an sBIT chunk.
+         
+         Basic gamma correction:
+           2 bit gray:  0.50495
+           4 bit gray:  0.81888
+           8 bit gray:  0.49933
+           8 bit color: 0.49933
+           indexed:     0.00000
+          16 bit gray:  0.74080
+          16 bit color: 0.74080
+         
+         Gamma correction with sBIT:
+          16 bit gray:  0.74058
+          16 bit color: 0.74058
+         
+         Gamma correction with 16 to 8 bit reduction:
+          16 bit gray:  1.97052
+          16 bit color: 1.97052
+         
+         Gamma correction with background:
+           8 bit gray:  19.34140
+           8 bit color: 17.44857
+          16 bit gray:  3.52430
+          16 bit color: 82.37971
+         
+         Gamma correction with alpha mode:
+           8 bit gray:  17.48251
+           8 bit color: 17.48251
+          16 bit gray:  309.24044
+          16 bit color: 310.97330
+         PASS: pngvalid --touch Debug\pngvalid.out (floating point arithmetic)
+     1>Done Building Project "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\pngvalid\pngvalid.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:58.96

@@ -1,3 +1,4 @@
+#ifdef ARM9
 /*
 
 			Copyright (C) 2017  Coto
@@ -219,3 +220,4 @@ int main(int argc, char **argv)   {
 	
 	return 0;
 }
+#endif
