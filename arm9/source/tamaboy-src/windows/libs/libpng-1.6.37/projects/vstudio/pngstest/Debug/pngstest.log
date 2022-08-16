@@ -1,0 +1,48 @@
+﻿Build started 07/08/2022 0:54:59.
+     1>Project "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\pngstest\pngstest.vcxproj" on node 3 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I..\zlib /I..\..\..\scripts /Zi /nologo /Wall /WX /Od /Oi /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D PNG_USE_DLL /D _UNICODE /D UNICODE /GF /Gm- /EHsc /RTC1 /MDd /GS /Gy- /fp:precise /fp:except- /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /FR"Debug\\" /Gd /TC /wd4255 /wd4668 /wd4710 /wd4711 /wd4746 /wd4820 /wd4996 /analyze- /errorReport:prompt ..\..\..\contrib\libtests\pngstest.c
+         pngstest.c
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngstest.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\\" libpng16.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngstest.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngstest.lib" /MACHINE:X86 /SAFESEH Debug\pngstest.obj
+         pngstest.vcxproj -> C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngstest.exe
+       BscMake:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\bscmake.exe /nologo /o"C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngstest.bsc" Debug\pngstest.sbr
+       CustomBuildStep:
+         "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\Debug\pngstest.exe" --strict --log --touch "Debug\pngstest.out" ../../../contrib/pngsuite/basn0g01.png ../../../contrib/pngsuite/basn0g02.png ../../../contrib/pngsuite/basn0g04.png ../../../contrib/pngsuite/basn0g08.png ../../../contrib/pngsuite/basn0g16.png ../../../contrib/pngsuite/basn2c08.png ../../../contrib/pngsuite/basn2c16.png ../../../contrib/pngsuite/basn3p01.png ../../../contrib/pngsuite/basn3p02.png ../../../contrib/pngsuite/basn3p04.png ../../../contrib/pngsuite/basn3p08.png ../../../contrib/pngsuite/basn4a08.png ../../../contrib/pngsuite/basn4a16.png ../../../contrib/pngsuite/basn6a08.png ../../../contrib/pngsuite/basn6a16.png ../../../contrib/pngsuite/ftbbn0g01.png ../../../contrib/pngsuite/ftbbn0g02.png ../../../contrib/pngsuite/ftbbn0g04.png ../../../contrib/pngsuite/ftbbn2c16.png ../../../contrib/pngsuite/ftbbn3p08.png ../../../contrib/pngsuite/ftbgn2c16.png ../../../contrib/pngsuite/ftbgn3p08.png ../../../contrib/pngsuite/ftbrn2c08.png ../../../contrib/pngsuite/ftbwn0g16.png ../../../contrib/pngsuite/ftbwn3p08.png ../../../contrib/pngsuite/ftbyn3p08.png ../../../contrib/pngsuite/ftp0n0g08.png ../../../contrib/pngsuite/ftp0n2c08.png ../../../contrib/pngsuite/ftp0n3p08.png ../../../contrib/pngsuite/ftp1n3p08.png
+         :VCEnd
+         PASS: ../../../contrib/pngsuite/basn0g01.png
+         PASS: ../../../contrib/pngsuite/basn0g02.png
+         PASS: ../../../contrib/pngsuite/basn0g04.png
+         PASS: ../../../contrib/pngsuite/basn0g08.png
+         PASS: ../../../contrib/pngsuite/basn0g16.png
+         PASS: ../../../contrib/pngsuite/basn2c08.png
+         PASS: ../../../contrib/pngsuite/basn2c16.png
+         PASS: ../../../contrib/pngsuite/basn3p01.png
+         PASS: ../../../contrib/pngsuite/basn3p02.png
+         PASS: ../../../contrib/pngsuite/basn3p04.png
+         PASS: ../../../contrib/pngsuite/basn3p08.png
+         PASS: ../../../contrib/pngsuite/basn4a08.png
+         PASS: ../../../contrib/pngsuite/basn4a16.png
+         PASS: ../../../contrib/pngsuite/basn6a08.png
+         PASS: ../../../contrib/pngsuite/basn6a16.png
+         PASS: ../../../contrib/pngsuite/ftbbn0g01.png
+         PASS: ../../../contrib/pngsuite/ftbbn0g02.png
+         PASS: ../../../contrib/pngsuite/ftbbn0g04.png
+         PASS: ../../../contrib/pngsuite/ftbbn2c16.png
+         PASS: ../../../contrib/pngsuite/ftbbn3p08.png
+         PASS: ../../../contrib/pngsuite/ftbgn2c16.png
+         PASS: ../../../contrib/pngsuite/ftbgn3p08.png
+         PASS: ../../../contrib/pngsuite/ftbrn2c08.png
+         PASS: ../../../contrib/pngsuite/ftbwn0g16.png
+         PASS: ../../../contrib/pngsuite/ftbwn3p08.png
+         PASS: ../../../contrib/pngsuite/ftbyn3p08.png
+         PASS: ../../../contrib/pngsuite/ftp0n0g08.png
+         PASS: ../../../contrib/pngsuite/ftp0n2c08.png
+         PASS: ../../../contrib/pngsuite/ftp0n3p08.png
+         PASS: ../../../contrib/pngsuite/ftp1n3p08.png
+     1>Done Building Project "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\pngstest\pngstest.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.68

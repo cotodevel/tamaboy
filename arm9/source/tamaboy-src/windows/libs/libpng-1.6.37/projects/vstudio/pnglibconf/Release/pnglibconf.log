@@ -1,0 +1,11 @@
+﻿Build started 07/08/2022 0:54:47.
+     1>Project "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\pnglibconf\pnglibconf.vcxproj" on node 3 (Rebuild target(s)).
+     1>CustomBuildStep:
+         copy ..\..\..\scripts\pnglibconf.h.prebuilt ..\..\..\pnglibconf.h
+         :VCEnd
+                 1 archivo(s) copiado(s).
+     1>Done Building Project "C:\bitbucket_clone\tamaboy\windows\libs\libpng-1.6.37\projects\vstudio\pnglibconf\pnglibconf.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.17
