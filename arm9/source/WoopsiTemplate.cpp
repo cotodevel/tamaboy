@@ -297,8 +297,7 @@ void WoopsiTemplate::startup(int argc, char **argv)   {
 	else{
 		nocashMessage("tamalib init OK !");
 	}
-    cpu_set_speed(0);
-    cycle_count = (u32*)cpu_state.tick_counter;
+    cpu_set_speed(SPEED_1X);
 
 	state_load(SAVE_PATH);
 	
