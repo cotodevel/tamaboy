@@ -432,15 +432,6 @@ void draw_icon(uint8 x, uint8 y, uint8 num, uint8 v)
 __attribute__((section(".dtcm")))
 u32 bankedButtons=0;
 
-__attribute__((section(".dtcm")))
-u32* cycle_count=NULL;
-
-__attribute__((section(".dtcm")))
-u32 next_frame_count=0;
-
-__attribute__((section(".dtcm")))
-int next_frame_overflow=0;
-
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
@@ -463,24 +454,11 @@ void tama_process(){
 	hw_set_button(BTN_MIDDLE, (i&(KEY_A|KEY_UP|KEY_DOWN))?1:0);
 	hw_set_button(BTN_RIGHT, (i&(KEY_B|KEY_RIGHT))?1:0);
 	
-	// set number of cycles to next frame 
-	next_frame_count += 546;
-	next_frame_overflow += 0xa;
-	if (next_frame_overflow >= 0x10) {
-		next_frame_overflow &= 0xf;
-		next_frame_count++;
-	}
+	u32 loops = 101; //(66mhz/32k)/20 =  1/20th~ of CPU threshold per frame
 	// do some processor stuff 
-	while (*cycle_count < next_frame_count) {
+	while (loops > 0) {
 		tamalib_step();
-		tamalib_step();
-		tamalib_step();
-		tamalib_step();
-		
-		tamalib_step();
-		tamalib_step();
-		tamalib_step();
-		tamalib_step();
+		loops--;
 	}	
 }
 
