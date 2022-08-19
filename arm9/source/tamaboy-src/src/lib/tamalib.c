@@ -26,6 +26,8 @@
 #include "hw.h"
 #include "cpu.h"
 #include "hal.h"
+#include <math.h>
+
 #ifdef ARM9
 #include "debugNocash.h"
 #endif
@@ -287,23 +289,72 @@ void tamalib_mainloop(void)
 //VS2012 specific end
 
 //NDS specific start
+#define ARM9
 #ifdef ARM9
 
 static u16 thisFreq = 0;
+static int sin_pos = 0;
+static u8 stream[AUDIO_SAMPLES];
+static bool curplaying = false;
+
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("Os")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 void hal_set_frequency(u32_t freq){
-	short const freq_table[] = {500,700,900,1100,1300,1500,1700,2000};
-    int n = freq_table[freq] + 30000;
-	thisFreq = (u16)n;
+	//if(freq > AUDIO_FREQUENCY){
+	//	freq = AUDIO_FREQUENCY;
+	//}
+	if (thisFreq != freq) {
+		thisFreq = freq;
+		sin_pos = 0;
+	}
+	curplaying = false;
 }
 	
 static u8 panning = 1;
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("Ofast")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 void hal_play_frequency(bool_t en){
+	unsigned int i;
+	if (en) {
+		if(curplaying == false){
+			#define audioScale (int)(AUDIO_FREQUENCY * 10)
+			// Generate the required frequency 
+			for (i = 0; i < AUDIO_SAMPLES; i+=8) {
+				*(u8 *)&stream[i] = AUDIO_VOLUME * sin(2 * M_PI * (i + sin_pos) * thisFreq / (audioScale));
+				*(u8 *)&stream[i+1] = AUDIO_VOLUME * sin(2 * M_PI * ((i+1) + sin_pos) * thisFreq / (audioScale));
+				*(u8 *)&stream[i+2] = AUDIO_VOLUME * sin(2 * M_PI * ((i+2) + sin_pos) * thisFreq / (audioScale));
+				*(u8 *)&stream[i+3] = AUDIO_VOLUME * sin(2 * M_PI * ((i+3) + sin_pos) * thisFreq / (audioScale));
+				*(u8 *)&stream[i+4] = AUDIO_VOLUME * sin(2 * M_PI * ((i+4) + sin_pos) * thisFreq / (audioScale));
+				*(u8 *)&stream[i+5] = AUDIO_VOLUME * sin(2 * M_PI * ((i+5) + sin_pos) * thisFreq / (audioScale));
+				*(u8 *)&stream[i+6] = AUDIO_VOLUME * sin(2 * M_PI * ((i+6) + sin_pos) * thisFreq / (audioScale));
+				*(u8 *)&stream[i+7] = AUDIO_VOLUME * sin(2 * M_PI * ((i+7) + sin_pos) * thisFreq / (audioScale));
+			}
+			sin_pos = (sin_pos + AUDIO_SAMPLES) % (audioScale);
+			u32 cnt   = SCHANNEL_ENABLE | SOUND_ONE_SHOT | SOUND_VOL(127) | SOUND_PAN(64) | (0 << 29) | (1 << 24); //(0=PCM8,
+			int len = AUDIO_SAMPLES<<1;
+			u16 freq = AUDIO_FREQUENCY;
+			writeARM7SoundChannelFromSource(9, cnt, (u16)freq, (u32)&stream[0], (u32)len);
+			curplaying = true;
+		}
+	}
+	
+	/*
 	int channel = 9; //PSG
 	//Bit24-26  Wave Duty    (0..7) ;HIGH=(N+1)*12.5%, LOW=(7-N)*12.5% (PSG only)
 	u8 wavDuty = 6;
@@ -312,7 +363,7 @@ void hal_play_frequency(bool_t en){
 		cnt = (SCHANNEL_ENABLE | cnt);
 	}
 	writeARM7SoundChannel(channel, cnt, thisFreq);
-	
+	*/
 	if(panning == 1){
 		panning = 2;
 	}

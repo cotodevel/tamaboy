@@ -137,9 +137,9 @@ typedef enum {
 #define SHELL_PATH			RES_PATH"/shell.png"
 #define ICONS_PATH			RES_PATH"/icons.png"
 
-#define AUDIO_FREQUENCY			48000
-#define AUDIO_SAMPLES			480 // 10 ms @ 48000 Hz
-#define AUDIO_VOLUME			0.2f
+#define AUDIO_FREQUENCY			32000
+#define AUDIO_SAMPLES			1200 
+#define AUDIO_VOLUME			20
 
 #define DEFAULT_FRAMERATE				30 // fps
 #define MEM_FRAMERATE			DEFAULT_FRAMERATE // fps
