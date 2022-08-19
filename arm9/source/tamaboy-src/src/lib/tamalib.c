@@ -293,27 +293,32 @@ static u16 thisFreq = 0;
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
-void hal_set_frequency(u32_t freq)
-{
-	short const freq_table[] = {(2076<<4),2068<<4,2060<<4,2830<<5,2044<<4,2028<<4,2011<<4,1996<<4};
-    int n = freq_table[freq] + 9800*2;
+void hal_set_frequency(u32_t freq){
+	short const freq_table[] = {500,700,900,1100,1300,1500,1700,2000};
+    int n = freq_table[freq] + 30000;
 	thisFreq = (u16)n;
 }
-
-
+	
+static u8 panning = 1;
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
-void hal_play_frequency(bool_t en)
-{
+void hal_play_frequency(bool_t en){
 	int channel = 9; //PSG
 	//Bit24-26  Wave Duty    (0..7) ;HIGH=(N+1)*12.5%, LOW=(7-N)*12.5% (PSG only)
 	u8 wavDuty = 6;
-	u32 cnt   = SOUND_ONE_SHOT | SOUND_VOL(2) | SOUND_PAN(48) | (3 << 29) | (wavDuty << 24); //3=PSG/Noise)
+	u32 cnt   = SOUND_ONE_SHOT | SOUND_VOL(50) | SOUND_PAN(48 * panning) | (3 << 29) | (wavDuty << 24); //3=PSG/Noise)
 	if (en){
 		cnt = (SCHANNEL_ENABLE | cnt);
 	}
 	writeARM7SoundChannel(channel, cnt, thisFreq);
+	
+	if(panning == 1){
+		panning = 2;
+	}
+	else{
+		panning = 1;
+	}
 }
 
 #ifdef ARM9

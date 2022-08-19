@@ -39,6 +39,7 @@ USA
 #include "ima_adpcm.h"
 #include "tamalib.h"
 #include "mem_edit.h"
+#include "powerTGDS.h"
 
 // Includes
 #include "WoopsiTemplate.h"
@@ -199,6 +200,8 @@ int main(int argc, char **argv)   {
 		TWLSetTouchscreenTWLMode();
 	}
 	
+	initSound();
+
 	// Create Woopsi UI
 	WoopsiTemplate WoopsiTemplateApp;
 	WoopsiTemplateProc = &WoopsiTemplateApp;
