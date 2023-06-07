@@ -65,45 +65,13 @@ __attribute__((optimize("O0")))
 #if (!defined(__GNUC__) && defined(__clang__))
 __attribute__ ((optnone))
 #endif
-void WoopsiTemplate::startup(int argc, char **argv)   {
-	
-	//Init Main Engine (A) as 3D
-	bool isTGDSCustomConsole = true;	//set default console or custom console: custom console
-	GUI_init(isTGDSCustomConsole);
-	GUI_clear();
-	
-	//xmalloc init removes args, so save them
-	int i = 0;
-	for(i = 0; i < argc; i++){
-		argvs[i] = argv[i];
-	}
+void WoopsiTemplate::startup(int argc, char **argv){
 
-	bool isCustomTGDSMalloc = true;
-	setTGDSMemoryAllocator(getProjectSpecificMemoryAllocatorSetup(TGDS_ARM7_MALLOCSTART, TGDS_ARM7_MALLOCSIZE, isCustomTGDSMalloc, TGDSDLDI_ARM7_ADDRESS));
-	sint32 fwlanguage = (sint32)getLanguage();
-	
-	//argv destroyed here because of xmalloc init, thus restore them
-	for(i = 0; i < argc; i++){
-		argv[i] = argvs[i];
-	}
-
-	switch_dswnifi_mode(dswifi_idlemode);
-	asm("mcr	p15, 0, r0, c7, c10, 4");
-	flush_icache_all();
-	flush_dcache_all();
-	
-	int ret=FS_init();
-	if (ret == 0)
-	{
-		
-	}
-	else{
-		
-	}
-	
 	//tama setup
 	//render TGDSLogo from a LZSS compressed file
 	RenderTGDSLogoMainEngine((uint8*)&TGDSLogoLZSSCompressed[0], TGDSLogoLZSSCompressed_size);
+	
+	initSound();
 	//apply scaling to main engine
 	REG_BG3PA = stretch_x;
 	REG_BG3PB = 0; REG_BG3PC = 0;
