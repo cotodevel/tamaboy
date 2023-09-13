@@ -73,6 +73,18 @@
 #include "limitsTGDS.h"
 #include "dldi.h"
 #include "debugNocash.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern int vsnprintf(char *str, size_t size, const char *fmt, va_list list);
+
+#ifdef __cplusplus
+}
+#endif
+
+
 #endif
 
 #if defined(WIN32)
