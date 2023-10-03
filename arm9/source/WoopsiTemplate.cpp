@@ -17,7 +17,6 @@
 #include "keypadTGDS.h"
 #include "gui_console_connector.h"
 #include "TGDSLogoLZSSCompressed.h"
-#include "VideoGL.h"
 #include "videoTGDS.h"
 #include "math.h"
 #include "imagepcx.h"
