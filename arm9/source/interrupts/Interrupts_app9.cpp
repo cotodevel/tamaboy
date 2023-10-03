@@ -24,7 +24,6 @@ USA
 #include "dsregs_asm.h"
 #include "main.h"
 #include "keypadTGDS.h"
-#include "VideoGL.h"
 #include "videoTGDS.h"
 #include "math.h"
 #include "imagepcx.h"
@@ -35,8 +34,6 @@ USA
 //User Handler Definitions
 #include "woopsifuncs.h"
 #include "WoopsiTemplate.h"
-
-#include "CubeImported.h"
 
 #ifdef ARM9
 __attribute__((section(".itcm")))
