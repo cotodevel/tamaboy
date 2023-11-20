@@ -66,7 +66,7 @@ __attribute__((optimize("O0")))
 __attribute__ ((optnone))
 #endif
 void playTamaIntro(){
-	playSoundStream("0:/drumSample.ima", _FileHandleVideo, _FileHandleAudio);
+	playSoundStream("0:/drumSample.ima", _FileHandleVideo, _FileHandleAudio, TGDS_ARM7_AUDIOBUFFER_STREAM);
 }
 
 static inline void menuShow(){
