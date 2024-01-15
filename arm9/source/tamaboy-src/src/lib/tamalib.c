@@ -28,6 +28,8 @@
 #include "hal.h"
 #ifdef ARM9
 #include "debugNocash.h"
+#include "ipcfifoTGDSUser.h"
+#include "nds_cp15_misc.h"
 #endif
 
 exec_mode_t exec_mode = EXEC_MODE_RUN;
@@ -334,9 +336,12 @@ uint8 SetPix(uint8 X, uint8 Y, bool isSelectedIcon){
 		nocashMessage("re-enabling VBLANK!");
 		enableWaitForVblankC();
 		playTamaIntro();
-		//Sync to NDS RTC
-		//struct sIPCSharedTGDSSpecific* sIPCSharedTGDSSpecificInst = getsIPCSharedTGDSSpecific();
-		//memcpy((unsigned char *)&tama_io_memory[16], (unsigned char *)&sIPCSharedTGDSSpecificInst->tama_clock_io_arm7[0], (int)6);	
+		//Sync current tama RTC time (BCD format)
+		struct sIPCSharedTGDSSpecific* sIPCSharedTGDSSpecificInst = getsIPCSharedTGDSSpecific();
+		coherent_user_range((uint32) &sIPCSharedTGDSSpecificInst->tama_clock_io_arm7[0], sizeof( sIPCSharedTGDSSpecificInst->tama_clock_io_arm7));
+		tama_io_memory[0xA] = sIPCSharedTGDSSpecificInst->tama_clock_io_arm7[0]; //hh
+		tama_io_memory[0x9] = sIPCSharedTGDSSpecificInst->tama_clock_io_arm7[1]; //mm
+		tama_io_memory[0x8] = sIPCSharedTGDSSpecificInst->tama_clock_io_arm7[2]; //ss
 		reEnableVblank = true;
 	}
 	

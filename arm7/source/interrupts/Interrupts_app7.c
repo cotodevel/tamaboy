@@ -103,7 +103,7 @@ __attribute__ ((optnone))
 #endif
 void VcounterUser(){
 	struct sIPCSharedTGDS * sIPCSharedTGDSInst = (struct sIPCSharedTGDS *)TGDSIPCStartAddress;
-	//Handle Clock (should this one run on IRQs instead?)
+	//Convert NDS RTC -> RTC BCD format
 	sIPCSharedTGDSInst->ndsRTCSeconds = nds_get_time7();
 	unsigned char hh = ((unsigned char)sIPCSharedTGDSInst->tmInst.tm_hour);
     unsigned char mm = ((unsigned char)sIPCSharedTGDSInst->tmInst.tm_min);

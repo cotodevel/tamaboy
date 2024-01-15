@@ -299,7 +299,7 @@ extern void cpu_release(void);
 extern int cpu_step(void);
 
 extern u12_t *g_program;
-extern MEM_BUFFER_TYPE memory[MEM_BUFFER_SIZE];
+extern u4_t tama_io_memory[MEMORY_SIZE];
 extern input_port_t inputs[INPUT_PORT_NUM];
 extern interrupt_t interrupts[INT_SLOT_NUM];
 
