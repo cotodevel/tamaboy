@@ -267,24 +267,9 @@ bool convertHHMMSSDateTimeToTamaFormat(unsigned char hh, unsigned char mm, unsig
     }
     
     if(convertStatus == true){
-        //tama_io_memorySource[0] == &tama_io_memory[16]
-        tama_io_memorySource[0] = (secDec >> 0) & 0xF; //decimal: "s[s]" Decimal 0-9
-        
-        //tama_io_memorySource[1] == &tama_io_memory[17]
-        tama_io_memorySource[1] = (secDec >> 8) & 0xF; //decimal: "[s]s" Decimal 0-9
-        
-        //tama_io_memorySource[2] == &tama_io_memory[18]
-        tama_io_memorySource[2] = (minDec >> 0) & 0xF; //decimal: "m[m]" Decimal 0-9
-        
-        //tama_io_memorySource[3] == &tama_io_memory[19]
-        tama_io_memorySource[3] = (minDec >> 8) & 0xF; //decimal: "[m]m" Decimal 0-5
-        
-        //tama_io_memorySource[4] == &tama_io_memory[20]
-        tama_io_memorySource[4] =  (hourDec >> 0) & 0xF; //decimal: "h[h]" hex 0-F 
-        
-        //tama_io_memorySource[5] == &tama_io_memory[21]
-        tama_io_memorySource[5] =  (hourDec >> 8) & 0xF; //decimal: "[h]h" hex 0-F
+        tama_io_memorySource[0] =  (u8)(((hourDec >> 0) & 0xF) | (((hourDec >> 8) & 0xF) << 4));
+        tama_io_memorySource[1] = (u8)(((minDec >> 0) & 0xF) | (((minDec >> 8) & 0xF) << 4));
+        tama_io_memorySource[2] = (u8)(((secDec >> 0) & 0xF) | (((secDec >> 8) & 0xF) << 4));
     }
-    
     return convertStatus;
 }
