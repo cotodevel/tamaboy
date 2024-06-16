@@ -27,22 +27,27 @@ USA
 #include "usrsettingsTGDS.h"
 #include "timerTGDS.h"
 #include "biosTGDS.h"
+#include "loader.h"
 
 //---------------------------------------------------------------------------------
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
 int main(int argc, char **argv) {
 //---------------------------------------------------------------------------------
 	/*			TGDS 1.6 Standard ARM7 Init code start	*/
-	
-	//wait for VRAM D to be assigned from ARM9->ARM7 (ARM7 has load/store on byte/half/words on VRAM)
-	while (!(*((vuint8*)0x04000240) & 0x2));
-	
-	installWifiFIFO();		
-	
-	/*			TGDS 1.6 Standard ARM7 Init code end	*/
+	installWifiFIFO();
+	while(!(*(u8*)0x04000240 & 2) ){} //wait for VRAM_D block
+	ARM7InitDLDI(TGDS_ARM7_MALLOCSTART, TGDS_ARM7_MALLOCSIZE, TGDSDLDI_ARM7_ADDRESS);
+	SendFIFOWords(FIFO_ARM7_RELOAD, 0xFF); //ARM7 Reload OK -> acknowledge ARM9
+    /*			TGDS 1.6 Standard ARM7 Init code end	*/
 	
     while (1) {
 		handleARM7SVC();	/* Do not remove, handles TGDS services */
-		HaltUntilIRQ();
+		HaltUntilIRQ(); //Save power until next irq
 	}
 	return 0;
 }

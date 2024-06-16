@@ -35,6 +35,10 @@ USA
 #include "spiTGDS.h"
 #include "clockTGDS.h"
 
+//TGDS-MB v3 bootloader
+void bootfile(){
+}
+
 //User Handler Definitions
 
 #ifdef ARM9
