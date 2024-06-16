@@ -506,4 +506,5 @@ void Woopsi::ApplicationMainLoop()  {
 	
 	//Handle TGDS stuff...
 	tama_process();
+	HaltUntilIRQ(); //Save power until next irq
 }
