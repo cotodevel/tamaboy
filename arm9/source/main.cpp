@@ -106,54 +106,15 @@ __attribute__((optimize("O0")))
 __attribute__ ((optnone))
 #endif
 int main(int argc, char **argv)   {
-	
-	/*			TGDS 1.6 Standard ARM9 Init code start (TGDS Reload + custom VRAM + Woopsi SDK)	*/
-	bool isTGDSCustomConsole = false;	//set default console or custom console: default console
+	/*			TGDS 1.6 Standard ARM9 Init code start (custom VRAM + Woopsi SDK)	*/
+	bool isTGDSCustomConsole = false;	//set default console or custom console: custom console
 	GUI_init(isTGDSCustomConsole);
 	GUI_clear();
-	
-	printf("              ");
-	printf("              ");
 
 	bool isCustomTGDSMalloc = true;
 	setTGDSMemoryAllocator(getProjectSpecificMemoryAllocatorSetup(isCustomTGDSMalloc));
-	sint32 fwlanguage = (sint32)getLanguage();
 	
 	int ret=FS_init();
-	if (ret == 0)
-	{
-		printf("FS Init ok.");
-	}
-	else{
-		printf("FS Init error: %d", ret);
-	}
-	
-	asm("mcr	p15, 0, r0, c7, c10, 4");
-	flush_icache_all();
-	flush_dcache_all();
-	
-	/*			TGDS 1.6 Standard ARM9 Init code end (TGDS Reload + custom VRAM + Woopsi SDK)	*/
-	
-	REG_IME = 0;
-	set0xFFFF0000FastMPUSettings();
-	//TGDS-Projects -> legacy NTR TSC compatibility
-	if(__dsimode == true){
-		TWLSetTouchscreenTWLMode();
-	}
-	REG_IME = 1;
-	
-	setupDisabledExceptionHandler();
-	
-	/*			TGDS 1.6 Standard ARM9 Init code start (custom VRAM + Woopsi SDK)	*/
-	isTGDSCustomConsole = true;	//set default console or custom console: custom console
-	GUI_init(isTGDSCustomConsole);
-	GUI_clear();
-
-	isCustomTGDSMalloc = true;
-	setTGDSMemoryAllocator(getProjectSpecificMemoryAllocatorSetup(isCustomTGDSMalloc));
-	fwlanguage = (sint32)getLanguage();
-
-	ret=FS_init();
 	if (ret == 0)
 	{
 		
@@ -167,6 +128,15 @@ int main(int argc, char **argv)   {
 	flush_dcache_all();
 	
 	/*			TGDS 1.6 Standard ARM9 Init code end (custom VRAM + Woopsi SDK)	*/
+	
+	REG_IME = 0;
+	setupDisabledExceptionHandler();
+	set0xFFFF0000FastMPUSettings();
+	//TGDS-Projects -> legacy NTR TSC compatibility
+	if(__dsimode == true){
+		TWLSetTouchscreenTWLMode();
+	}
+	REG_IME = 1;
 	
 	// Create Woopsi UI
 	WoopsiTemplate WoopsiTemplateApp;
