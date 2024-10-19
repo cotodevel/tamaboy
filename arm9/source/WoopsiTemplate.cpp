@@ -27,6 +27,7 @@
 #include "rom.h"
 #include "state.h"
 #include "timerTGDS.h"
+#include "powerTGDS.h"
 #include "cpu.h"
 #include "program.h"
 #include "mem_edit.h"
@@ -481,7 +482,7 @@ void WoopsiTemplate::handleClickEvent(const GadgetEventArgs& e)   {
 			
 			if(pressedB == true){
 				state_save(SAVE_PATH);
-				printMessage("Tamagotchi has been saved correctly. It's safe to turn off unit now.");
+				printMessage("Tamagotchi has been saved correctly. Turning off the hardware now.");
 				shutdownNDSHardware();
 				while(1==1){
 					IRQWait(0, IRQ_VBLANK);
@@ -506,5 +507,21 @@ void Woopsi::ApplicationMainLoop()  {
 	
 	//Handle TGDS stuff...
 	tama_process();
+
+	if(keysDown() & KEY_R){	
+		GUI.GBAMacroMode = !GUI.GBAMacroMode; //swap LCD
+		if(GUI.GBAMacroMode == true){
+			setBacklight(POWMAN_BACKLIGHT_BOTTOM_BIT);
+		}
+		else{
+			setBacklight(POWMAN_BACKLIGHT_TOP_BIT|POWMAN_BACKLIGHT_BOTTOM_BIT);
+		}
+		TGDSLCDSwap();
+		
+		while(keysDown() & KEY_R){
+			scanKeys();
+		}
+	}
+
 	HaltUntilIRQ(); //Save power until next irq
 }

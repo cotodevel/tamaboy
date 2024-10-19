@@ -103,6 +103,8 @@ bool InitProjectSpecificConsole(){
 	mainEngine = false;
 	setOrientation(ORIENTATION_0, mainEngine);
 	
+	GUI.GBAMacroMode = false;	//GUI console at bottom screen
+	TGDSLCDSwap();
 	return true;
 }
 
