@@ -79,16 +79,28 @@ export TARGET_LIBRARY_TGDS_TWL_9 = $(TARGET_LIBRARY_TGDS_NTR_9)i
 
 export DIRS_ARM7_SRC = source/	\
 			source/interrupts/	\
-			../common/	\
-			../common/templateCode/source/	\
-			../common/templateCode/data/arm7/	
-			
-export DIRS_ARM7_HEADER = source/	\
+			source/	\
+			source/petitfs-src/	\
 			source/interrupts/	\
-			include/	\
 			../common/	\
 			../common/templateCode/source/	\
 			../common/templateCode/data/arm7/	\
+			../../../common/	\
+			../../../common/templateCode/source/	\
+			../../../common/templateCode/data/arm7/	
+			
+export DIRS_ARM7_HEADER = include/	\
+			source/	\
+			source/interrupts/	\
+			source/	\
+			source/petitfs-src/	\
+			source/interrupts/	\
+			../common/	\
+			../common/templateCode/source/	\
+			../common/templateCode/data/arm7/	\
+			../../../common/	\
+			../../../common/templateCode/source/	\
+			../../../common/templateCode/data/arm7/	\
 			build/	\
 			../$(PosIndCodeDIR_FILENAME)/$(DIR_ARM7)/include/
 #####################################################ARM9#####################################################
@@ -130,10 +142,8 @@ compile	:
 	-$(MAKE)	-R	-C	$(PosIndCodeDIR_FILENAME)/$(DIR_ARM7)/
 	-cp	-r	$(TARGET_LIBRARY_MAKEFILES_SRC9_FPIC)	$(CURDIR)/$(PosIndCodeDIR_FILENAME)/$(DIR_ARM9)
 	-$(MAKE)	-R	-C	$(PosIndCodeDIR_FILENAME)/$(DIR_ARM9)/
-ifeq ($(SOURCE_MAKEFILE7),default)
-	cp	-r	$(TARGET_LIBRARY_MAKEFILES_SRC7_NOFPIC)	$(CURDIR)/$(DIR_ARM7)
-endif
-	$(MAKE)	-R	-C	$(DIR_ARM7)/
+	-cp	-r	$(TARGET_LIBRARY_MAKEFILES_SRC7_NOFPIC)	$(CURDIR)/common/templateCode/stage1_7/
+	$(MAKE)	-R	-C	$(CURDIR)/common/templateCode/stage1_7/
 ifeq ($(SOURCE_MAKEFILE9),default)
 	cp	-r	$(TARGET_LIBRARY_MAKEFILES_SRC9_NOFPIC)	$(CURDIR)/$(DIR_ARM9)
 endif
@@ -141,8 +151,8 @@ endif
 
 $(EXECUTABLE_FNAME)	:	compile
 	-@echo 'ndstool begin'
-	$(NDSTOOL)	-v	-c $@	-7  $(CURDIR)/arm7/arm7.bin	-e7  0x02380000	-9 $(CURDIR)/arm9/$(BINSTRIP_RULE_9) -e9  0x02000800	-r9 0x02000000 -b icon.bmp "SNEmulDS $(EXECUTABLE_VERSION_HEADER) ; SNES Emulator for DS; by archeide bubble2k gladius" 
-	$(NDSTOOL)	-c 	${@:.nds=.srl} -7  $(CURDIR)/arm7/arm7_twl.bin -e7  0x02380000	-9 $(CURDIR)/arm9/arm9_twl.bin -e9  0x02000800	-r9 0x02000000	\
+	$(NDSTOOL)	-v	-c $@	-7  $(CURDIR)/common/templateCode/stage1_7/$(BINSTRIP_RULE_7)	-e7  0x02380000	-9 $(CURDIR)/arm9/$(BINSTRIP_RULE_9) -e9  0x02000800	-r9 0x02000000 -b icon.bmp "SNEmulDS $(EXECUTABLE_VERSION_HEADER) ; SNES Emulator for DS; by archeide bubble2k gladius" 
+	$(NDSTOOL)	-c 	${@:.nds=.srl} -7  $(CURDIR)/common/templateCode/stage1_7/arm7_twl.bin	-e7  0x02380000	-9 $(CURDIR)/arm9/arm9_twl.bin -e9  0x02000800	-r9 0x02000000	\
 	-g "TGDS" "NN" "NDS.TinyFB"	\
 	-z 80040000 -u 00030004 -a 00000138 \
 	-b icon.bmp "$(TGDSPROJECTNAME);$(TGDSPROJECTNAME) TWL Binary;" \
@@ -156,7 +166,6 @@ $(EXECUTABLE_FNAME)	:	compile
 each_obj = $(foreach dirres,$(dir_read_arm9_files),$(dirres).)
 	
 clean:
-	$(MAKE)	clean	-C	$(DIR_ARM7)/
 	$(MAKE) clean	-C	$(PosIndCodeDIR_FILENAME)/$(DIR_ARM7)/
 ifeq ($(SOURCE_MAKEFILE7),default)
 	-@rm -rf $(CURDIR)/$(DIR_ARM7)/Makefile
