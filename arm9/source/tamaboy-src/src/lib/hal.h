@@ -86,6 +86,8 @@ typedef struct {
 
 #endif /* _HAL_H_ */
 
+extern bool_t is_audio_playing;
+
 #ifdef __cplusplus
 extern "C" {
 #endif

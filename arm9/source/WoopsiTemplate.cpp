@@ -485,7 +485,8 @@ void WoopsiTemplate::handleClickEvent(const GadgetEventArgs& e)   {
 				printMessage("Tamagotchi has been saved correctly. Turning off the hardware now.");
 				shutdownNDSHardware();
 				while(1==1){
-					IRQWait(0, IRQ_VBLANK);
+					bool waitForVblank = false;
+					int threadsRan = runThreads(internalTGDSThreads, waitForVblank);			
 				}
 			}
 		}	
@@ -508,7 +509,37 @@ void Woopsi::ApplicationMainLoop()  {
 	//Handle TGDS stuff...
 	tama_process();
 
-	if(keysDown() & KEY_R){	
+	//Timeout screens
+	u32 pressed = keysDown();
+	if(
+		(pressed&KEY_TOUCH)
+		||
+		(pressed&KEY_A)
+		||
+		(pressed&KEY_B)
+		||
+		(pressed&KEY_UP)
+		||
+		(pressed&KEY_DOWN)
+		||
+		(pressed&KEY_LEFT)
+		||
+		(pressed&KEY_RIGHT)
+		||
+		(pressed&KEY_L)
+		||
+		(pressed&KEY_R)
+		){
+		bottomScreenIsLit = true; //input event triggered
+		if(GUI.GBAMacroMode == true){
+			setBacklight(POWMAN_BACKLIGHT_BOTTOM_BIT);
+		}
+		else{
+			setBacklight(POWMAN_BACKLIGHT_TOP_BIT|POWMAN_BACKLIGHT_BOTTOM_BIT);
+		}
+	}
+
+	if(pressed & KEY_R){	
 		GUI.GBAMacroMode = !GUI.GBAMacroMode; //swap LCD
 		if(GUI.GBAMacroMode == true){
 			setBacklight(POWMAN_BACKLIGHT_BOTTOM_BIT);
@@ -523,5 +554,6 @@ void Woopsi::ApplicationMainLoop()  {
 		}
 	}
 
-	HaltUntilIRQ(); //Save power until next irq
+	bool waitForVblank = false;
+	int threadsRan = runThreads(internalTGDSThreads, waitForVblank);
 }

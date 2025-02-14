@@ -25,6 +25,7 @@ USA
 #include "dsregs.h"
 #include "fatfslayerTGDS.h"
 #include "utilsTGDS.h"
+#include "TGDS_threads.h"
 
 #endif
 
@@ -43,6 +44,15 @@ extern struct fd * _FileHandleAudio;
 extern bool stopSoundStreamUser();
 extern void closeSoundUser();
 extern void playTamaIntro();
+
+extern struct task_Context * internalTGDSThreads;
+extern void onThreadOverflowUserCode(u32 * args);
+extern void taskA(u32 * args);
+extern bool bottomScreenIsLit;
+extern void handleTurnOnTurnOffScreenTimeout();
+extern bool iconCallbackWakeup;
+extern int iconCallbackWakeupAcknowledgeTimeout;
+extern bool triggerSpecialEffect;
 
 #ifdef __cplusplus
 }

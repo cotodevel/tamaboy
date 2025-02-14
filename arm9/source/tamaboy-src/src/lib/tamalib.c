@@ -30,6 +30,7 @@
 #include "debugNocash.h"
 #include "ipcfifoTGDSUser.h"
 #include "nds_cp15_misc.h"
+#include "main.h"
 #endif
 
 exec_mode_t exec_mode = EXEC_MODE_RUN;
@@ -306,6 +307,9 @@ static u8 panning = 1;
 __attribute__((section(".itcm")))
 #endif
 void hal_play_frequency(bool_t en){
+	if (is_audio_playing != en) {
+		is_audio_playing = en;
+	}
 	int channel = 9; //PSG
 	//Bit24-26  Wave Duty    (0..7) ;HIGH=(N+1)*12.5%, LOW=(7-N)*12.5% (PSG only)
 	u8 wavDuty = 6;
@@ -336,12 +340,18 @@ uint8 SetPix(uint8 X, uint8 Y, bool isSelectedIcon){
 		nocashMessage("re-enabling VBLANK!");
 		enableWaitForVblankC();
 		playTamaIntro();
+		
+		//The below code breaks in-game events because of how clock is internally handled.
+		
 		//Sync current tama RTC time (BCD format)
+		/*
 		struct sIPCSharedTGDSSpecific* sIPCSharedTGDSSpecificInst = getsIPCSharedTGDSSpecific();
 		coherent_user_range((uint32) &sIPCSharedTGDSSpecificInst->tama_clock_io_arm7[0], sizeof( sIPCSharedTGDSSpecificInst->tama_clock_io_arm7));
 		tama_io_memory[0xA] = sIPCSharedTGDSSpecificInst->tama_clock_io_arm7[0]; //hh
 		tama_io_memory[0x9] = sIPCSharedTGDSSpecificInst->tama_clock_io_arm7[1]; //mm
 		tama_io_memory[0x8] = sIPCSharedTGDSSpecificInst->tama_clock_io_arm7[2]; //ss
+		*/
+
 		reEnableVblank = true;
 	}
 	
@@ -413,6 +423,7 @@ void draw_square(uint8 x, uint8 y, uint8 w, uint8 h, uint8 v)
 	}
 }
 
+//icon number: ranges from 0 - 7. Only 0 - 6 are selectable
 #ifdef ARM9
 __attribute__((section(".itcm")))
 #endif
@@ -425,6 +436,26 @@ void draw_icon(uint8 x, uint8 y, uint8 num, uint8 v)
 			for (i = 0; i < ICON_SIZE; i++) {
 				if(icons[num][j][i]) {
 					SetPix(x + i, y + j, true);
+					
+					//New tama event
+					if(num == 7){
+						//NDS: Turn on the screens, when tama action takes place.					
+						#ifdef ARM9
+						//Raise event when lcd backlight is lit
+						if(iconCallbackWakeup == false){
+							if (is_audio_playing && (iconCallbackWakeupAcknowledgeTimeout >= 16) && (bottomScreenIsLit == true) ) {
+								iconCallbackWakeupAcknowledgeTimeout = 0;
+							}
+							iconCallbackWakeup = true;
+						}
+						
+						//Raise event when lcd backlight is off and an event was requested at least once
+						else if( (iconCallbackWakeup == true) && (is_audio_playing) && (iconCallbackWakeupAcknowledgeTimeout >= 16) && (triggerSpecialEffect == false) ){
+							triggerSpecialEffect = true;
+							bottomScreenIsLit = true;
+						}
+						#endif
+					}
 				}
 			}
 		}
@@ -446,7 +477,7 @@ u32 bankedButtons=0;
 __attribute__((section(".itcm")))
 #endif
 #if (defined(__GNUC__) && !defined(__clang__))
-__attribute__((optimize("Os")))
+__attribute__((optimize("O0")))
 #endif
 
 #if (!defined(__GNUC__) && defined(__clang__))

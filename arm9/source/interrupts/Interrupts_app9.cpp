@@ -109,6 +109,7 @@ void screenLidHasOpenedhandlerUser(){
 	if(WoopsiTemplateProc != NULL){
 		WoopsiTemplateProc->handleLidOpen();
 	}
+	bottomScreenIsLit = true;
 }
 
 //Note: this event is hardware triggered from ARM7, on ARM9 a signal is raised through the FIFO hardware

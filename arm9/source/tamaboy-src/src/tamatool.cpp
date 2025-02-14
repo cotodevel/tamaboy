@@ -47,7 +47,7 @@
 #include "soundTGDS.h"
 #include "timerTGDS.h"
 #include "InterruptsARMCores_h.h"
-
+#include "main.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
@@ -121,7 +121,7 @@ static SDL_AudioDeviceID audio_dev;
 
 static u32_t current_freq = 0; // in dHz
 static unsigned int sin_pos = 0;
-static bool_t is_audio_playing = 0;
+bool_t is_audio_playing = 0;
 
 static bool_t matrix_buffer[LCD_HEIGHT][LCD_WIDTH] = {{0}};
 static bool_t icon_buffer[ICON_NUM] = {0};
