@@ -41,9 +41,13 @@ USA
 #include "mem_edit.h"
 #include "powerTGDS.h"
 #include "loader.h"
+#include "TGDS_threads.h"
 
 // Includes
 #include "WoopsiTemplate.h"
+
+__attribute__((section(".dtcm")))
+struct task_Context * internalTGDSThreads = NULL;
 
 //TGDS Soundstreaming API
 int internalCodecType = SRC_NONE; //Returns current sound stream format: WAV, ADPCM or NONE
@@ -126,7 +130,7 @@ int main(int argc, char **argv)   {
 	asm("mcr	p15, 0, r0, c7, c10, 4");
 	flush_icache_all();
 	flush_dcache_all();
-	
+	internalTGDSThreads = getTGDSThreadSystem();
 	/*			TGDS 1.6 Standard ARM9 Init code end (custom VRAM + Woopsi SDK)	*/
 	
 	REG_IME = 0;
@@ -138,6 +142,15 @@ int main(int argc, char **argv)   {
 	}
 	REG_IME = 1;
 	
+	int taskATimeMS = 1; //Task execution requires at least 1ms: Timeout led backlight.
+	if(registerThread(internalTGDSThreads, (TaskFn)&taskA, (u32*)NULL, taskATimeMS, (TaskFn)&onThreadOverflowUserCode, tUnitsMilliseconds) != THREAD_OVERFLOW){
+        
+    }
+
+	powerOFF3DEngine(); //Power off ARM9 3D Engine to save power
+	setBacklight(POWMAN_BACKLIGHT_BOTTOM_BIT);
+	bottomScreenIsLit = true;
+
 	// Create Woopsi UI
 	WoopsiTemplate WoopsiTemplateApp;
 	WoopsiTemplateProc = &WoopsiTemplateApp;
@@ -158,10 +171,143 @@ int main(int argc, char **argv)   {
 	tamalib_free_bp(&g_breakpoints);
 	
 	while(1) {
-		handleARM9SVC();	/* Do not remove, handles TGDS services */
-		IRQVBlankWait();
+		bool waitForVblank = false;
+		int threadsRan = runThreads(internalTGDSThreads, waitForVblank);
 	}
 	
 	return 0;
 }
+
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+void taskA(u32 * args){
+	handleTurnOnTurnOffScreenTimeout();
+}
+
+bool iconCallbackWakeup = false;	//Allow the set icon callback to timeout the screen backlight
+bool bottomScreenIsLit = false;
+static int millisecondsElapsed = 0;	
+static bool toggleScreen = false;
+int iconCallbackWakeupAcknowledgeTimeout = 0;
+bool triggerSpecialEffect = false;
+
+//called 50 times per second
+void handleTurnOnTurnOffScreenTimeout(){
+
+	//special effects start	
+	if( (iconCallbackWakeup == true) && (iconCallbackWakeupAcknowledgeTimeout < 16) ){
+		bottomScreenIsLit = true; //special effect is treated as screen lit
+		if (  (iconCallbackWakeupAcknowledgeTimeout % 4 ) ){
+			if(toggleScreen == false){
+				if(GUI.GBAMacroMode == true){
+					setBacklight(POWMAN_BACKLIGHT_BOTTOM_BIT);
+				}
+				else{
+					setBacklight(POWMAN_BACKLIGHT_TOP_BIT|POWMAN_BACKLIGHT_BOTTOM_BIT);
+				}
+			}
+			else{
+				setBacklight(0);	
+			}
+			toggleScreen = !toggleScreen;
+		}
+		iconCallbackWakeupAcknowledgeTimeout++;
+	}
+	//special effects end
+	
+	else{
+		millisecondsElapsed ++;
+		if (  millisecondsElapsed >= 500 ){
+			setBacklight(0);
+			millisecondsElapsed = 0;
+
+			if(triggerSpecialEffect == true){
+				iconCallbackWakeupAcknowledgeTimeout = 0;
+				triggerSpecialEffect = false;
+			}
+			
+		}
+		//turn on bottom screen if input event
+		if(bottomScreenIsLit == true){
+			if(GUI.GBAMacroMode == true){
+				setBacklight(POWMAN_BACKLIGHT_BOTTOM_BIT);
+			}
+			else{
+				setBacklight(POWMAN_BACKLIGHT_TOP_BIT|POWMAN_BACKLIGHT_BOTTOM_BIT);
+			}
+			bottomScreenIsLit = false;
+			millisecondsElapsed = 0;
+		}	
+		else{
+			iconCallbackWakeup = false; //Re-enable the action event (8th icon) trigger, only when screen is turned off.
+		}
+	}
+
+}
+
+//////////////////////////////////////////////////////// Threading User code start : TGDS Project specific ////////////////////////////////////////////////////////
+//User callback when Task Overflows. Intended for debugging purposes only, as normal user code tasks won't overflow if a task is implemented properly.
+//	u32 * args = This Task context
+#if (defined(__GNUC__) && !defined(__clang__))
+__attribute__((optimize("O0")))
+#endif
+#if (!defined(__GNUC__) && defined(__clang__))
+__attribute__ ((optnone))
+#endif
+void onThreadOverflowUserCode(u32 * args){
+	struct task_def * thisTask = (struct task_def *)args;
+	struct task_Context * parentTaskCtx = thisTask->parentTaskCtx;	//get parent Task Context node 
+	char threadStatus[64];
+	switch(thisTask->taskStatus){
+		case(INVAL_THREAD):{
+			strcpy(threadStatus, "INVAL_THREAD");
+		}break;
+		
+		case(THREAD_OVERFLOW):{
+			strcpy(threadStatus, "THREAD_OVERFLOW");
+		}break;
+		
+		case(THREAD_EXECUTE_OK_WAIT_FOR_SLEEP):{
+			strcpy(threadStatus, "THREAD_EXECUTE_OK_WAIT_FOR_SLEEP");
+		}break;
+		
+		case(THREAD_EXECUTE_OK_WAKEUP_FROM_SLEEP_GO_IDLE):{
+			strcpy(threadStatus, "THREAD_EXECUTE_OK_WAKEUP_FROM_SLEEP_GO_IDLE");
+		}break;
+	}
+	
+	char debOut2[256];
+	char timerUnitsMeasurement[32];
+	if( thisTask->taskStatus == THREAD_OVERFLOW){
+		if(thisTask->timerFormat == tUnitsMilliseconds){
+			strcpy(timerUnitsMeasurement, "ms");
+		}
+		else if(thisTask->timerFormat == tUnitsMicroseconds){
+			strcpy(timerUnitsMeasurement, "us");
+		} 
+		else{
+			strcpy(timerUnitsMeasurement, "-");
+		}
+		sprintf(debOut2, "[%s]. Thread requires at least (%d) %s. ", threadStatus, thisTask->remainingThreadTime, timerUnitsMeasurement);
+	}
+	else{
+		sprintf(debOut2, "[%s]. ", threadStatus);
+	}
+	
+	int TGDSDebuggerStage = 10;
+	u8 fwNo = *(u8*)(0x027FF000 + 0x5D);
+	handleDSInitOutputMessage((char*)debOut2);
+	handleDSInitError(TGDSDebuggerStage, (u32)fwNo);
+	
+	while(1==1){
+		HaltUntilIRQ();
+	}
+}
+//////////////////////////////////////////////////////////////////////// Threading User code end /////////////////////////////////////////////////////////////////////////////
+
 #endif
