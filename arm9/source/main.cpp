@@ -191,7 +191,7 @@ void taskA(u32 * args){
 
 bool iconCallbackWakeup = false;	//Allow the set icon callback to timeout the screen backlight
 bool bottomScreenIsLit = false;
-static int millisecondsElapsed = 0;	
+int millisecondsElapsed = 0;	
 static bool toggleScreen = false;
 int iconCallbackWakeupAcknowledgeTimeout = 0;
 bool triggerSpecialEffect = false;
