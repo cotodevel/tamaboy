@@ -53,6 +53,7 @@ extern void handleTurnOnTurnOffScreenTimeout();
 extern bool iconCallbackWakeup;
 extern int iconCallbackWakeupAcknowledgeTimeout;
 extern bool triggerSpecialEffect;
+extern int millisecondsElapsed;
 
 #ifdef __cplusplus
 }

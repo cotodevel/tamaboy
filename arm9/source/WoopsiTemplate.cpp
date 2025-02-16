@@ -531,26 +531,25 @@ void Woopsi::ApplicationMainLoop()  {
 		(pressed&KEY_R)
 		){
 		bottomScreenIsLit = true; //input event triggered
-		if(GUI.GBAMacroMode == true){
-			setBacklight(POWMAN_BACKLIGHT_BOTTOM_BIT);
-		}
-		else{
-			setBacklight(POWMAN_BACKLIGHT_TOP_BIT|POWMAN_BACKLIGHT_BOTTOM_BIT);
-		}
-	}
-
-	if(pressed & KEY_R){	
-		GUI.GBAMacroMode = !GUI.GBAMacroMode; //swap LCD
-		if(GUI.GBAMacroMode == true){
-			setBacklight(POWMAN_BACKLIGHT_BOTTOM_BIT);
-		}
-		else{
-			setBacklight(POWMAN_BACKLIGHT_TOP_BIT|POWMAN_BACKLIGHT_BOTTOM_BIT);
-		}
-		TGDSLCDSwap();
+		triggerSpecialEffect = false;
+		iconCallbackWakeup = true;
+		iconCallbackWakeupAcknowledgeTimeout = 17;
+		millisecondsElapsed = 0;
 		
-		while(keysDown() & KEY_R){
+		if(pressed & KEY_R){	
+			GUI.GBAMacroMode = !GUI.GBAMacroMode; //swap LCD
+			TGDSLCDSwap();
 			scanKeys();
+			while(keysDown() & KEY_R){
+				scanKeys();
+			}
+		}
+
+		if(GUI.GBAMacroMode == true){
+			setBacklight(POWMAN_BACKLIGHT_BOTTOM_BIT);
+		}
+		else{
+			setBacklight(POWMAN_BACKLIGHT_TOP_BIT|POWMAN_BACKLIGHT_BOTTOM_BIT);
 		}
 	}
 
