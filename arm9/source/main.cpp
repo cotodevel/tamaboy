@@ -46,6 +46,20 @@ USA
 // Includes
 #include "WoopsiTemplate.h"
 
+//TGDS-MB ARM7 Bootldr (embedded ARM7 VRAM core)
+#include "arm7bootldr.h"
+#include "arm7bootldr_twl.h"
+
+u32 * getTGDSMBV3ARM7Bootloader(){
+	if(__dsimode == false){
+		swiDecompressLZSSWram((u8*)&arm7bootldr[0], (u8*)TGDS_MB_V3_ARM7_SCRATCHPAD_LZSS_DECOMP_BUF);
+	}
+	else{
+		swiDecompressLZSSWram((u8*)&arm7bootldr_twl[0], (u8*)TGDS_MB_V3_ARM7_SCRATCHPAD_LZSS_DECOMP_BUF);
+	}
+	return (u32*)TGDS_MB_V3_ARM7_SCRATCHPAD_LZSS_DECOMP_BUF;
+}
+
 __attribute__((section(".dtcm")))
 struct task_Context * internalTGDSThreads = NULL;
 
@@ -111,6 +125,15 @@ __attribute__ ((optnone))
 #endif
 int main(int argc, char **argv)   {
 	/*			TGDS 1.6 Standard ARM9 Init code start (custom VRAM + Woopsi SDK)	*/
+	
+	//Save Stage 1: IWRAM ARM7 payload: NTR/TWL (0x03800000)
+	memcpy((void *)TGDS_MB_V3_ARM7_STAGE1_ADDR, (const void *)0x02380000, (int)(96*1024));
+	coherent_user_range_by_size((uint32)TGDS_MB_V3_ARM7_STAGE1_ADDR, (int)(96*1024));
+
+	//Execute Stage 2: VRAM ARM7 payload: TWL (0x06000000). Otherwise DLDI init failure
+	u32 * payload = getTGDSMBV3ARM7Bootloader();
+	executeARM7Payload((u32)0x02380000, 96*1024, payload);
+	
 	bool isTGDSCustomConsole = false;	//set default console or custom console: custom console
 	GUI_init(isTGDSCustomConsole);
 	GUI_clear();
@@ -134,12 +157,12 @@ int main(int argc, char **argv)   {
 	/*			TGDS 1.6 Standard ARM9 Init code end (custom VRAM + Woopsi SDK)	*/
 	
 	REG_IME = 0;
-	setupDisabledExceptionHandler();
 	set0xFFFF0000FastMPUSettings();
 	//TGDS-Projects -> legacy NTR TSC compatibility
 	if(__dsimode == true){
 		TWLSetTouchscreenTWLMode();
 	}
+	setupDisabledExceptionHandler();
 	REG_IME = 1;
 	
 	int taskATimeMS = 1; //Task execution requires at least 1ms: Timeout led backlight.
@@ -150,6 +173,32 @@ int main(int argc, char **argv)   {
 	powerOFF3DEngine(); //Power off ARM9 3D Engine to save power
 	setBacklight(POWMAN_BACKLIGHT_BOTTOM_BIT);
 	bottomScreenIsLit = true;
+
+	/*
+	char thisArgv[3][MAX_TGDSFILENAME_LENGTH];
+	memset(thisArgv, 0, sizeof(thisArgv));
+	strcpy(&thisArgv[0][0], TGDSPROJECTNAME);		//Arg0:	This Binary loaded
+	strcpy(&thisArgv[1][0], bootldr);				//Arg1:	NDS Binary reloaded
+	strcpy(&thisArgv[2][0], curChosenBrowseFile);	//Arg2: NDS Binary ARG0
+	u32 * payload = getTGDSMBV3ARM7Bootloader();
+	if(TGDSMultibootRunNDSPayload(bootldr, (u8*)payload, 3, (char*)&thisArgv) == false){ //should never reach here, nor even return true. Should fail it returns false
+		printf("Invalid NDS/TWL Binary >%d", TGDSPrintfColor_Yellow);
+		printf("or you are in NTR mode trying to load a TWL binary. >%d", TGDSPrintfColor_Yellow);
+		printf("or you are missing the TGDS-multiboot payload in root path. >%d", TGDSPrintfColor_Yellow);
+		printf("Press (A) to continue. >%d", TGDSPrintfColor_Yellow);
+		while(1==1){
+			scanKeys();
+			if(keysDown()&KEY_A){
+				scanKeys();
+				while(keysDown() & KEY_A){
+					scanKeys();
+				}
+				break;
+			}
+		}
+		menuShow();
+	}
+	*/
 
 	// Create Woopsi UI
 	WoopsiTemplate WoopsiTemplateApp;

@@ -55,6 +55,8 @@ extern int iconCallbackWakeupAcknowledgeTimeout;
 extern bool triggerSpecialEffect;
 extern int millisecondsElapsed;
 
+extern u32 * getTGDSMBV3ARM7Bootloader();
+
 #ifdef __cplusplus
 }
 #endif

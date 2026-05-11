@@ -23,7 +23,6 @@ USA
 #include "xmem.h"
 #include "dldi.h"
 #include "dsregs.h"
-#include "utilsTGDS.h"
 
 ////////[For custom Memory Allocator implementation]:////////
 //You need to override getProjectSpecificMemoryAllocatorSetup():
