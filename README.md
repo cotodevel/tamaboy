@@ -42,6 +42,6 @@ Since this is a TGDS project, you can follow the same steps, as, for example, ht
 Drums intro thanks to Thomas Drachmann - A Short Drum Solo
 
 
-Latest stable release: https://bitbucket.org/Coto88/tamaboy/get/TGDS1.65.zip
+Latest stable release: http://github.com/cotodevel/tamaboy/archive/TGDS1.65.zip
 
 Coto
